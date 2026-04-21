@@ -37,6 +37,27 @@ const HeaderNavigation = ({ user = null, onNavigate = () => {}, currentPath = '/
       icon: 'History',
       roles: ['student', 'faculty'],
       tooltip: 'View attendance history'
+    },
+    {
+      label: 'Events',
+      path: '/events',
+      icon: 'Calendar',
+      roles: ['student', 'faculty'],
+      tooltip: 'Campus events and activities'
+    },
+    {
+      label: 'Assignments',
+      path: '/assignments',
+      icon: 'BookOpen',
+      roles: ['student', 'faculty'],
+      tooltip: 'View and manage assignments'
+    },
+    {
+      label: 'Performance',
+      path: '/performance',
+      icon: 'TrendingUp',
+      roles: ['student'],
+      tooltip: 'View academic performance'
     }
   ];
 
@@ -85,7 +106,7 @@ const HeaderNavigation = ({ user = null, onNavigate = () => {}, currentPath = '/
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-2">
             {filteredNavItems?.map((item) => (
               <button
                 key={item?.path}

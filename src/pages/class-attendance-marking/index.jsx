@@ -34,9 +34,11 @@ const ClassAttendanceMarking = () => {
 
   // Mock class data
   const [classInfo] = useState({
+    id: "CS2021-DSA-A",
     subject: "Data Structures and Algorithms",
     time: "10:00 AM - 11:30 AM",
     room: "Room 301, CS Block",
+    location: "Room 301, CS Block",
     date: "13th September 2025",
     status: "active",
     faculty: "Dr. Rajesh Kumar"
@@ -321,6 +323,7 @@ const ClassAttendanceMarking = () => {
             onBulkMarkPresent={() => handleBulkStatusChange('present')}
             onBulkMarkAbsent={() => handleBulkStatusChange('absent')}
             selectedStudents={selectedStudents}
+            classInfo={classInfo}
           />
 
           {/* Student List Header */}

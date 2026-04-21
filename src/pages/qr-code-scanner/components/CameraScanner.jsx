@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import jsQR from 'jsqr';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
-const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, onCameraStatusChange }) => {
+const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, onCameraStatusChange, onScanAttemptsUpdate }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -34,6 +35,14 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
       stopScanning();
     }
   }, [isScanning, cameraStatus]);
+
+  // Effect to start scanning loop when scanningActive becomes true
+  useEffect(() => {
+    if (scanningActive && cameraStatus === 'ready') {
+      console.log('CameraScanner: Triggering scan loop, scanningActive:', scanningActive);
+      scanForQRCode();
+    }
+  }, [scanningActive, cameraStatus]);
 
   const checkCameraPermissions = async () => {
     try {
@@ -187,9 +196,13 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
   };
 
   const startScanning = () => {
+    console.log('CameraScanner: Starting scan, camera status:', cameraStatus);
     setScanningActive(true);
     setScanAttempts(0);
-    scanForQRCode();
+    if (onScanAttemptsUpdate) {
+      onScanAttemptsUpdate(0);
+    }
+    // Don't call scanForQRCode here - let the useEffect handle it
   };
 
   const stopScanning = () => {
@@ -198,7 +211,10 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
   };
 
   const scanForQRCode = () => {
-    if (!scanningActive || !videoRef?.current || cameraStatus !== 'ready') return;
+    if (!scanningActive || !videoRef?.current || cameraStatus !== 'ready') {
+      console.log('CameraScanner: Scan check failed - scanningActive:', scanningActive, 'videoRef:', !!videoRef?.current, 'cameraStatus:', cameraStatus);
+      return;
+    }
 
     const canvas = canvasRef?.current;
     const video = videoRef?.current;
@@ -208,29 +224,117 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
 
     canvas.width = video?.videoWidth;
     canvas.height = video?.videoHeight;
-    context?.drawImage(video, 0, 0, canvas?.width, canvas?.height);
-
-    // Simulate QR code detection (in real implementation, use a QR code library like jsQR)
-    const mockDetection = Math.random() > 0.85; // 15% chance of detection per scan
     
-    if (mockDetection && scanAttempts > 5) {
-      const mockQRData = {
-        classId: currentClass?.id || 'CS101-2024',
-        timestamp: Date.now(),
-        location: 'Room-A101',
-        sessionId: 'sess_' + Math.random()?.toString(36)?.substr(2, 9)
-      };
-      
-      setDetectedCode(mockQRData);
-      onScanSuccess?.(mockQRData);
-      setScanningActive(false);
-      
-      // Haptic feedback on mobile
-      if (navigator?.vibrate) {
-        navigator.vibrate([100, 50, 100]);
+    if (canvas.width === 0 || canvas.height === 0) {
+      // Video not ready yet, try again
+      setTimeout(() => {
+        if (scanningActive) {
+          scanForQRCode();
+        }
+      }, 100);
+      return;
+    }
+
+    context?.drawImage(video, 0, 0, canvas?.width, canvas?.height);
+    
+    // Get image data for jsQR
+    const imageData = context?.getImageData(0, 0, canvas?.width, canvas?.height);
+    
+    // Use jsQR to detect QR code
+    const code = jsQR(imageData?.data, imageData?.width, imageData?.height, {
+      inversionAttempts: "dontInvert",
+    });
+    
+    if (code) {
+      // QR code detected successfully
+      console.log('QR Code detected! Raw data:', code?.data);
+      try {
+        // Try to parse as JSON first
+        let qrData;
+        try {
+          qrData = JSON.parse(code?.data);
+          console.log('Parsed QR data as JSON:', qrData);
+          
+          // Check if QR code has expired (older than 30 seconds)
+          if (qrData?.timestamp) {
+            const currentTime = Date.now();
+            const qrAge = (currentTime - qrData.timestamp) / 1000; // age in seconds
+            
+            if (qrAge > 30) {
+              console.warn('QR code expired! Age:', qrAge, 'seconds');
+              onScanError?.('QR code expired. Please ask faculty to generate a new one.');
+              // Continue scanning for a fresh QR code
+              setTimeout(() => {
+                if (scanningActive) {
+                  scanForQRCode();
+                }
+              }, 1000); // Wait 1 second before retrying
+              return;
+            }
+            console.log('QR code is valid. Age:', qrAge, 'seconds');
+          }
+        } catch (e) {
+          // If not JSON, treat as plain text and parse the format
+          console.log('QR data is not JSON, parsing as string format');
+          // Expected format: "AttendEase-Class-{classId}-Session-{timestamp}"
+          const parts = code?.data?.split('-');
+          if (parts?.length >= 4 && parts[0] === 'AttendEase' && parts[1] === 'Class') {
+            const timestamp = parseInt(parts[4]) || Date.now();
+            
+            // Check expiration for string format too
+            const currentTime = Date.now();
+            const qrAge = (currentTime - timestamp) / 1000;
+            
+            if (qrAge > 30) {
+              console.warn('QR code expired! Age:', qrAge, 'seconds');
+              onScanError?.('QR code expired. Please ask faculty to generate a new one.');
+              setTimeout(() => {
+                if (scanningActive) {
+                  scanForQRCode();
+                }
+              }, 1000);
+              return;
+            }
+            
+            qrData = {
+              classId: parts[2],
+              timestamp: timestamp,
+              location: 'Scanned via QR',
+              sessionId: 'sess_' + Math.random()?.toString(36)?.substr(2, 9)
+            };
+            console.log('Parsed QR data from string format:', qrData);
+          } else {
+            // Fallback to generic format
+            qrData = {
+              classId: currentClass?.id || 'UNKNOWN',
+              timestamp: Date.now(),
+              location: 'Scanned via QR',
+              sessionId: 'sess_' + Math.random()?.toString(36)?.substr(2, 9),
+              rawData: code?.data
+            };
+            console.log('Using fallback QR data format:', qrData);
+          }
+        }
+        
+        setDetectedCode(qrData);
+        onScanSuccess?.(qrData);
+        setScanningActive(false);
+        
+        // Haptic feedback on mobile
+        if (navigator?.vibrate) {
+          navigator.vibrate([100, 50, 100]);
+        }
+      } catch (error) {
+        console.error('Error processing QR code:', error);
+        onScanError?.('Invalid QR code format');
       }
     } else {
-      setScanAttempts(prev => prev + 1);
+      // No QR code detected, continue scanning
+      const newAttempts = scanAttempts + 1;
+      setScanAttempts(newAttempts);
+      if (onScanAttemptsUpdate) {
+        onScanAttemptsUpdate(newAttempts);
+      }
       setTimeout(() => {
         if (scanningActive) {
           scanForQRCode();

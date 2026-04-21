@@ -64,6 +64,7 @@ const QRCodeScanner = () => {
   }, [navigate]);
 
   const handleScanSuccess = (qrData) => {
+    console.log('QR Code Scanned:', qrData);
     setScannedData(qrData);
     setShowConfirmation(true);
     setIsScanning(false);
@@ -81,7 +82,12 @@ const QRCodeScanner = () => {
     }
   };
 
+  const handleScanAttemptsUpdate = (attempts) => {
+    setScanAttempts(attempts);
+  };
+
   const handleStartScanning = () => {
+    console.log('Start scanning clicked. Camera status:', cameraStatus);
     if (cameraStatus === 'ready') {
       setIsScanning(true);
       setScanAttempts(0);
@@ -211,6 +217,7 @@ const QRCodeScanner = () => {
                   onScanSuccess={handleScanSuccess}
                   onScanError={handleScanError}
                   onCameraStatusChange={handleCameraStatusChange}
+                  onScanAttemptsUpdate={handleScanAttemptsUpdate}
                   isScanning={isScanning}
                   currentClass={currentClass}
                 />
