@@ -63,11 +63,14 @@ const CreateEventModal = ({ event, isOpen, onClose, onSave, isLoading }) => {
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl mx-4 max-h-screen overflow-y-auto">
-        <div className="bg-card rounded-lg shadow-xl border border-border overflow-hidden">
+      {/* Modal Wrapper */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        
+        {/* Modal Box */}
+        <div className="w-full mt-14 max-w-2xl max-h-[90vh] bg-card rounded-lg shadow-xl border border-border overflow-hidden flex flex-col">
+
           {/* Header */}
-          <div className="p-6 border-b border-border flex items-start justify-between sticky top-0 bg-card">
+          <div className="p-6 border-b border-border flex items-start justify-between sticky top-0 bg-card z-10">
             <div>
               <h2 className="text-xl font-semibold text-foreground">
                 {event?.id ? 'Edit Event' : 'Create New Event'}
@@ -84,9 +87,12 @@ const CreateEventModal = ({ event, isOpen, onClose, onSave, isLoading }) => {
             </button>
           </div>
 
-          {/* Content */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            {/* Title & Category Row */}
+          {/* Scrollable Content */}
+          <form
+            onSubmit={handleSubmit}
+            className="p-6 space-y-4 overflow-y-auto flex-1"
+          >
+            {/* Title & Category */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-foreground mb-2">
@@ -136,113 +142,77 @@ const CreateEventModal = ({ event, isOpen, onClose, onSave, isLoading }) => {
               />
             </div>
 
-            {/* Date, Time & Location Row */}
+            {/* Date, Time, Capacity */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Date *
-                </label>
-                <Input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Time *
-                </label>
-                <Input
-                  type="text"
-                  name="time"
-                  value={formData.time}
-                  onChange={handleInputChange}
-                  placeholder="e.g., 14:00"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Capacity *
-                </label>
-                <Input
-                  type="number"
-                  name="capacity"
-                  value={formData.capacity}
-                  onChange={handleInputChange}
-                  min="1"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Location */}
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Location *
-              </label>
+              <Input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleInputChange}
+                required
+              />
               <Input
                 type="text"
-                name="location"
-                value={formData.location}
+                name="time"
+                value={formData.time}
                 onChange={handleInputChange}
-                placeholder="Event location"
+                placeholder="e.g., 14:00"
+                required
+              />
+              <Input
+                type="number"
+                name="capacity"
+                value={formData.capacity}
+                onChange={handleInputChange}
+                min="1"
                 required
               />
             </div>
 
-            {/* Tags & Status Row */}
+            {/* Location */}
+            <Input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleInputChange}
+              placeholder="Event location"
+              required
+            />
+
+            {/* Tags & Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Tags (comma-separated)
-                </label>
-                <Input
-                  type="text"
-                  name="tags"
-                  value={formData.tags}
-                  onChange={handleInputChange}
-                  placeholder="e.g., AI, Machine Learning"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Status
-                </label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 rounded-md bg-muted border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="upcoming">Upcoming</option>
-                  <option value="ongoing">Ongoing</option>
-                  <option value="completed">Completed</option>
-                </select>
-              </div>
+              <Input
+                type="text"
+                name="tags"
+                value={formData.tags}
+                onChange={handleInputChange}
+                placeholder="e.g., AI, Machine Learning"
+              />
+
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 rounded-md bg-muted border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="upcoming">Upcoming</option>
+                <option value="ongoing">Ongoing</option>
+                <option value="completed">Completed</option>
+              </select>
             </div>
           </form>
 
           {/* Footer */}
           <div className="p-6 border-t border-border flex gap-3 justify-end sticky bottom-0 bg-card">
-            <Button
-              variant="ghost"
-              onClick={onClose}
-              disabled={isLoading}
-            >
+            <Button variant="ghost" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button
-              variant="default"
-              onClick={handleSubmit}
-              loading={isLoading}
-            >
+            <Button variant="default" onClick={handleSubmit} loading={isLoading}>
               <Icon name="Save" size={14} className="mr-2" />
               {event?.id ? 'Update Event' : 'Create Event'}
             </Button>
           </div>
+
         </div>
       </div>
     </>

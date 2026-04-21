@@ -21,7 +21,8 @@
     ],
     "scripts": {
       "start": "vite",
-      "build": "vite build --sourcemap",
+       "build": "vite build",
+       "build:debug": "vite build --sourcemap",
       "serve": "vite preview"
     },
     "warning": "🚨 CRITICAL: DO NOT REMOVE OR MODIFY ABOVE DEPENDENCIES - Required for app functionality"
@@ -59,7 +60,8 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build --sourcemap",
+    "build": "vite build",
+    "build:debug": "vite build --sourcemap",
     "serve": "vite preview"
   },
   "eslintConfig": {

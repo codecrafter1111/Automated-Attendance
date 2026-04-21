@@ -287,7 +287,7 @@ const Events = () => {
                   setSelectedEventToEdit(null);
                   setShowCreateModal(true);
                 }}
-                iconName="Plus"
+                // iconName="Plus"
                 className="flex items-center space-x-2"
               >
                 <Icon name="Plus" size={18} />

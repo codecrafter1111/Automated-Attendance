@@ -10,8 +10,21 @@ export default defineConfig({
   build: {
     outDir: "build",
     chunkSizeWarningLimit: 2000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          reactVendor: ["react", "react-dom", "react-router-dom"],
+          chartVendor: ["recharts", "d3", "date-fns"],
+          motionVendor: ["framer-motion"],
+        },
+      },
+    },
   },
-  plugins: [tsconfigPaths(), react(), tagger()],
+  plugins: [
+    tsconfigPaths(),
+    react(),
+    process.env.NODE_ENV === "development" ? tagger() : null,
+  ].filter(Boolean),
   server: {
     port: "4028",
     host: "0.0.0.0",

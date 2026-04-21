@@ -123,10 +123,10 @@ const ManualEntryModal = ({ isOpen, onClose, onSubmit, currentClass }) => {
               <div className="flex items-start space-x-3">
                 <Icon name="AlertTriangle" size={20} className="text-warning mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-warning mb-1">
+                  <p className="text-sm font-medium text-white mb-1">
                     Important Notes
                   </p>
-                  <ul className="text-xs text-warning space-y-1">
+                  <ul className="text-xs text-white space-y-1">
                     <li>• Only use QR codes provided by your instructor</li>
                     <li>• Each code can only be used once per student</li>
                     <li>• Manual entry is tracked for security purposes</li>

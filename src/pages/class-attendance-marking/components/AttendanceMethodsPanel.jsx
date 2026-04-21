@@ -16,7 +16,7 @@ const AttendanceMethodsPanel = ({
   const [networkURL, setNetworkURL] = useState('');
   const [isLocalhost, setIsLocalhost] = useState(false);
   const [qrRefreshKey, setQrRefreshKey] = useState(0);
-  const [timeRemaining, setTimeRemaining] = useState(30);
+  const [timeRemaining, setTimeRemaining] = useState(10);
 
   useEffect(() => {
     const hostname = window.location.hostname;
@@ -36,17 +36,17 @@ const AttendanceMethodsPanel = ({
   useEffect(() => {
     if (!qrCodeVisible) {
       setQrRefreshKey(0);
-      setTimeRemaining(30);
+      setTimeRemaining(10);
       return;
     }
 
     const countdownInterval = setInterval(() => {
-      setTimeRemaining(prev => (prev <= 1 ? 30 : prev - 1));
+      setTimeRemaining(prev => (prev <= 1 ? 10 : prev - 1));
     }, 1000);
 
     const refreshInterval = setInterval(() => {
       setQrRefreshKey(prev => prev + 1);
-      setTimeRemaining(30);
+      setTimeRemaining(10);
     }, 30000);
 
     return () => {
@@ -65,7 +65,7 @@ const AttendanceMethodsPanel = ({
       location: classInfo?.location || 'Room A-101',
       sessionId,
       faculty: classInfo?.faculty || 'Faculty Name',
-      expiresIn: 30
+      expiresIn: 10
     });
   }, [classInfo, qrRefreshKey]);
 
@@ -115,16 +115,16 @@ const AttendanceMethodsPanel = ({
             <div className="inline-block bg-white p-3 rounded relative">
               <QRCodeSVG value={qrCodeData} size={128} />
 
-              <div className="absolute top-1 right-1 bg-black text-white text-xs px-2 py-1 rounded">
+              <div className="absolute top-1 -right-10 bg-black text-white text-xs px-2 py-1 rounded">
                 {timeRemaining}s
               </div>
             </div>
 
-            <div className="mt-3">
+            <div className="mt-1">
               <div className="bg-gray-200 h-2 rounded">
                 <div
                   className="bg-green-500 h-2 rounded"
-                  style={{ width: `${(timeRemaining / 30) * 100}%` }}
+                  style={{ width: `${(timeRemaining / 10) * 100}%` }}
                 />
               </div>
               <p className="text-xs mt-1">

@@ -60,7 +60,7 @@ const ClassInfoHeader = ({ classInfo, attendanceWindow }) => {
         {/* Time Status Badge */}
         <div className={`px-3 py-1 rounded-full text-sm font-medium ${
           timeStatus?.status === 'active' ?'bg-success bg-opacity-10 text-success' 
-            : timeStatus?.status === 'early' ?'bg-warning bg-opacity-10 text-warning' :'bg-error bg-opacity-10 text-error'
+            : timeStatus?.status === 'early' ?'bg-warning bg-opacity-10 text-warning' :'bg-white bg-opacity-10 text-error'
         }`}>
           {timeStatus?.status === 'active' ? 'Active' : 
            timeStatus?.status === 'early' ? 'Upcoming' : 'Closed'}

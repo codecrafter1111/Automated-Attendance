@@ -65,7 +65,7 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
       />
 
       {/* Modal */}
-      <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-3xl mx-4 max-h-screen overflow-y-auto">
+      <div className="fixed top-1/2 mt-10 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-3xl mx-4 max-h-[85vh]  overflow-y-auto">
         <div className="bg-card rounded-xl shadow-card border border-border overflow-hidden">
           {/* Header */}
           <div className="p-6 border-b border-border flex items-start justify-between sticky top-0 bg-card">

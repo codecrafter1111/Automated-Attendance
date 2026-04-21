@@ -69,7 +69,7 @@ const ScanningControls = ({
               <Icon name="Scan" size={20} className="text-primary" />
             </div>
             <div>
-              <p className="font-medium text-primary">Scanning Active</p>
+              <p className="font-medium text-warning">Scanning Active</p>
               <p className="text-sm text-muted-foreground">
                 Position QR code within the frame
                 {scanAttempts > 0 && ` • ${scanAttempts} attempts`}

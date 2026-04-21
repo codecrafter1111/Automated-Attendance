@@ -393,7 +393,7 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
             {errorDetails?.instructions && (
               <div className="mb-4 p-3 bg-warning bg-opacity-10 rounded-lg border border-warning border-opacity-20 text-left w-full max-w-sm">
                 {errorDetails?.instructions?.map((instruction, index) => (
-                  <p key={index} className="text-warning text-xs mb-1">
+                  <p key={index} className="text-white text-xs mb-1">
                     {instruction}
                   </p>
                 ))}
