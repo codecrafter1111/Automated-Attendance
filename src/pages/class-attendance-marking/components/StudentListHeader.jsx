@@ -31,7 +31,7 @@ const StudentListHeader = ({
   ];
 
   return (
-    <div className="bg-card rounded-lg shadow-card border border-border p-4 mb-4">
+    <div className="bg-gradient-to-br from-card to-card/50 rounded-xl shadow-card border-2 border-border p-4 mb-4 hover:shadow-card-hover transition-all duration-300">
       {/* Header with selection info */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
         <div className="flex items-center space-x-4 mb-3 sm:mb-0">
@@ -39,33 +39,36 @@ const StudentListHeader = ({
             checked={allSelected}
             onChange={onSelectAll}
             label="Select All"
+            className="w-5 h-5 cursor-pointer"
           />
           {selectedCount > 0 && (
-            <span className="text-sm text-muted-foreground">
-              {selectedCount} of {totalCount} selected
+            <span className="text-sm font-semibold px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-primary">
+              {selectedCount} / {totalCount} selected
             </span>
           )}
         </div>
 
         {selectedCount > 0 && (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 gap-2">
             <Button
               variant="success"
               size="sm"
               onClick={() => onBulkActions('present')}
               iconName="Check"
               iconPosition="left"
+              className="shadow-button"
             >
-              Mark Present
+              Present
             </Button>
             <Button
-              variant="destructive"
+              variant="danger"
               size="sm"
               onClick={() => onBulkActions('absent')}
               iconName="X"
               iconPosition="left"
+              className="shadow-button"
             >
-              Mark Absent
+              Absent
             </Button>
             <Button
               variant="warning"
@@ -73,18 +76,20 @@ const StudentListHeader = ({
               onClick={() => onBulkActions('late')}
               iconName="Clock"
               iconPosition="left"
+              className="shadow-button"
             >
-              Mark Late
+              Late
             </Button>
           </div>
         )}
       </div>
+      
       {/* Search and Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <div className="relative">
           <Input
             type="search"
-            placeholder="Search students..."
+            placeholder="🔍 Search students..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e?.target?.value)}
             className="pl-10"
@@ -99,7 +104,7 @@ const StudentListHeader = ({
         <select
           value={filterStatus}
           onChange={(e) => onFilterChange(e?.target?.value)}
-          className="px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="px-4 py-2 border-2 border-border rounded-lg bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 hover:border-primary/50"
         >
           {filterOptions?.map(option => (
             <option key={option?.value} value={option?.value}>
@@ -111,34 +116,50 @@ const StudentListHeader = ({
         <select
           value={sortBy}
           onChange={(e) => onSortChange(e?.target?.value)}
-          className="px-3 py-2 border border-border rounded-md bg-input text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+          className="px-4 py-2 border-2 border-border rounded-lg bg-background text-foreground font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200 hover:border-primary/50"
         >
           {sortOptions?.map(option => (
             <option key={option?.value} value={option?.value}>
-              Sort by {option?.label}
+              {option?.label}
             </option>
           ))}
         </select>
       </div>
+      
       {/* Quick Stats */}
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-        <div className="flex items-center space-x-6 text-sm">
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-success rounded-full"></div>
-            <span className="text-muted-foreground">Present: {totalCount - selectedCount}</span>
+      <div className="pt-4 border-t-2 border-border">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-3 bg-gradient-to-br from-success/10 to-success/5 border-2 border-success/20 rounded-lg hover:border-success/40 transition-colors">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-success rounded-full"></div>
+              <span className="text-xs text-muted-foreground">Present</span>
+            </div>
+            <div className="text-lg font-bold text-success mt-1">{totalCount - selectedCount}</div>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-error rounded-full"></div>
-            <span className="text-muted-foreground">Absent: 0</span>
+          
+          <div className="p-3 bg-gradient-to-br from-error/10 to-error/5 border-2 border-error/20 rounded-lg hover:border-error/40 transition-colors">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-error rounded-full"></div>
+              <span className="text-xs text-muted-foreground">Absent</span>
+            </div>
+            <div className="text-lg font-bold text-error mt-1">0</div>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 bg-warning rounded-full"></div>
-            <span className="text-muted-foreground">Late: 0</span>
+          
+          <div className="p-3 bg-gradient-to-br from-warning/10 to-warning/5 border-2 border-warning/20 rounded-lg hover:border-warning/40 transition-colors">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-warning rounded-full"></div>
+              <span className="text-xs text-muted-foreground">Late</span>
+            </div>
+            <div className="text-lg font-bold text-warning mt-1">0</div>
           </div>
-        </div>
 
-        <div className="text-sm text-muted-foreground">
-          Total: {totalCount} students
+          <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 border-2 border-primary/20 rounded-lg hover:border-primary/40 transition-colors">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-primary rounded-full"></div>
+              <span className="text-xs text-muted-foreground">Total</span>
+            </div>
+            <div className="text-lg font-bold text-primary mt-1">{totalCount}</div>
+          </div>
         </div>
       </div>
     </div>

@@ -128,7 +128,7 @@ const FacultyDashboard = () => {
     const userData = localStorage.getItem('user');
     if (userData) {
       const parsedUser = JSON.parse(userData);
-      if (parsedUser?.role === 'faculty') {
+      if (parsedUser?.role === 'faculty' || parsedUser?.role === 'administrator') {
         setUser(parsedUser);
       } else {
         navigate('/login');

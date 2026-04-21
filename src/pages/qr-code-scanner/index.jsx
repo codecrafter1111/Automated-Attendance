@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import HeaderNavigation from '../../components/ui/HeaderNavigation';
 import BreadcrumbNavigation from '../../components/ui/BreadcrumbNavigation';
 import CameraScanner from './components/CameraScanner';
@@ -13,6 +13,7 @@ import Button from '../../components/ui/Button';
 
 const QRCodeScanner = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [user, setUser] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [cameraStatus, setCameraStatus] = useState('initializing');
@@ -48,20 +49,45 @@ const QRCodeScanner = () => {
   useEffect(() => {
     // Get user from localStorage
     const userData = localStorage.getItem('user');
-    if (userData) {
-      const parsedUser = JSON.parse(userData);
-      setUser(parsedUser);
-      
-      // Redirect non-students
-      if (parsedUser?.role !== 'student') {
-        navigate('/faculty-dashboard');
-        return;
+    
+    if (!userData) {
+      // If not logged in, redirect to login but preserve the QR parameters
+      const classId = searchParams.get('classId');
+      const sessionId = searchParams.get('sessionId');
+      if (classId && sessionId) {
+        // Encode redirect with proper URL encoding
+        const redirectURL = `/qr-code-scanner?classId=${encodeURIComponent(classId)}&sessionId=${encodeURIComponent(sessionId)}`;
+        navigate(`/login?redirect=${encodeURIComponent(redirectURL)}`);
+      } else {
+        navigate('/login');
       }
-    } else {
-      navigate('/login');
       return;
     }
-  }, [navigate]);
+
+    const parsedUser = JSON.parse(userData);
+    setUser(parsedUser);
+    
+    // Redirect non-students
+    if (parsedUser?.role !== 'student') {
+      navigate('/faculty-dashboard');
+      return;
+    }
+
+    // Auto-process scanned data if URL parameters exist
+    const classId = searchParams.get('classId');
+    const sessionId = searchParams.get('sessionId');
+    
+    if (classId && sessionId) {
+      console.log('✓ Auto-processing QR data:', { classId, sessionId });
+      const qrData = {
+        classId,
+        sessionId,
+        timestamp: Date.now(),
+        location: 'QR-Scanned'
+      };
+      handleScanSuccess(qrData);
+    }
+  }, [navigate, searchParams]);
 
   const handleScanSuccess = (qrData) => {
     setScannedData(qrData);
@@ -211,6 +237,7 @@ const QRCodeScanner = () => {
                   onScanSuccess={handleScanSuccess}
                   onScanError={handleScanError}
                   onCameraStatusChange={handleCameraStatusChange}
+                  onUseManualEntry={handleManualEntry}
                   isScanning={isScanning}
                   currentClass={currentClass}
                 />

@@ -10,7 +10,7 @@ const AttendanceConfirmationModal = ({
   classInfo,
   isProcessing = false 
 }) => {
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(15);
   const [locationVerified, setLocationVerified] = useState(false);
   const [biometricRequired, setBiometricRequired] = useState(false);
 
@@ -18,12 +18,16 @@ const AttendanceConfirmationModal = ({
     if (isOpen && countdown > 0) {
       const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       return () => clearTimeout(timer);
+    } else if (isOpen && countdown === 0) {
+      // Auto-close after countdown reaches 0
+      console.log('Auto-confirming attendance...');
+      handleConfirm();
     }
   }, [isOpen, countdown]);
 
   useEffect(() => {
     if (isOpen) {
-      setCountdown(10);
+      setCountdown(15);
       // Simulate location verification
       setTimeout(() => setLocationVerified(true), 1500);
       // Randomly require biometric verification

@@ -7,50 +7,50 @@ export default {
   theme: {
     extend: {
       colors: {
-        border: 'var(--color-border)', // gray-200
-        input: 'var(--color-input)', // white
-        ring: 'var(--color-ring)', // blue-800
-        background: 'var(--color-background)', // gray-50
-        foreground: 'var(--color-foreground)', // gray-800
+        border: 'var(--color-border)',
+        input: 'var(--color-input)',
+        ring: 'var(--color-ring)',
+        background: 'var(--color-background)',
+        foreground: 'var(--color-foreground)',
         primary: {
-          DEFAULT: 'var(--color-primary)', // blue-800
-          foreground: 'var(--color-primary-foreground)', // white
+          DEFAULT: 'var(--color-primary)',
+          foreground: 'var(--color-primary-foreground)',
         },
         secondary: {
-          DEFAULT: 'var(--color-secondary)', // violet-600
-          foreground: 'var(--color-secondary-foreground)', // white
+          DEFAULT: 'var(--color-secondary)',
+          foreground: 'var(--color-secondary-foreground)',
         },
         destructive: {
-          DEFAULT: 'var(--color-destructive)', // red-500
-          foreground: 'var(--color-destructive-foreground)', // white
+          DEFAULT: 'var(--color-destructive)',
+          foreground: 'var(--color-destructive-foreground)',
         },
         muted: {
-          DEFAULT: 'var(--color-muted)', // gray-100
-          foreground: 'var(--color-muted-foreground)', // gray-500
+          DEFAULT: 'var(--color-muted)',
+          foreground: 'var(--color-muted-foreground)',
         },
         accent: {
-          DEFAULT: 'var(--color-accent)', // amber-500
-          foreground: 'var(--color-accent-foreground)', // white
+          DEFAULT: 'var(--color-accent)',
+          foreground: 'var(--color-accent-foreground)',
         },
         popover: {
-          DEFAULT: 'var(--color-popover)', // white
-          foreground: 'var(--color-popover-foreground)', // gray-800
+          DEFAULT: 'var(--color-popover)',
+          foreground: 'var(--color-popover-foreground)',
         },
         card: {
-          DEFAULT: 'var(--color-card)', // white
-          foreground: 'var(--color-card-foreground)', // gray-800
+          DEFAULT: 'var(--color-card)',
+          foreground: 'var(--color-card-foreground)',
         },
         success: {
-          DEFAULT: 'var(--color-success)', // emerald-500
-          foreground: 'var(--color-success-foreground)', // white
+          DEFAULT: 'var(--color-success)',
+          foreground: 'var(--color-success-foreground)',
         },
         warning: {
-          DEFAULT: 'var(--color-warning)', // amber-500
-          foreground: 'var(--color-warning-foreground)', // white
+          DEFAULT: 'var(--color-warning)',
+          foreground: 'var(--color-warning-foreground)',
         },
         error: {
-          DEFAULT: 'var(--color-error)', // red-500
-          foreground: 'var(--color-error-foreground)', // white
+          DEFAULT: 'var(--color-error)',
+          foreground: 'var(--color-error-foreground)',
         },
       },
       fontFamily: {
@@ -64,17 +64,23 @@ export default {
         bold: '700',
       },
       borderRadius: {
-        lg: '8px',
-        md: '6px',
-        sm: '4px',
+        lg: '12px',
+        md: '8px',
+        sm: '6px',
       },
       boxShadow: {
-        card: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        modal: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        'card': '0 2px 8px rgba(0, 0, 0, 0.08)',
+        'card-hover': '0 8px 24px rgba(0, 0, 0, 0.12)',
+        'modal': '0 10px 40px rgba(0, 0, 0, 0.15)',
+        'input': '0 1px 3px rgba(0, 0, 0, 0.08)',
+        'button': '0 2px 4px rgba(0, 0, 0, 0.1)',
       },
       animation: {
-        'fade-in': 'fadeIn 200ms ease-in-out',
-        'slide-in': 'slideIn 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+        'fade-in': 'fadeIn 300ms ease-out',
+        'slide-in': 'slideIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        'fade-in-up': 'fadeInUp 400ms ease-out',
+        'bounce-gentle': 'bounceGentle 600ms ease-in-out',
+        'pulse-soft': 'pulseSoft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
         fadeIn: {
@@ -82,9 +88,30 @@ export default {
           '100%': { opacity: '1' },
         },
         slideIn: {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(0)' },
+          '0%': { transform: 'translateX(-100%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
         },
+        fadeInUp: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        bounceGentle: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' },
+        },
+        pulseSoft: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.8' },
+        },
+      },
+      spacing: {
+        'safe-area': 'max(1rem, env(safe-area-inset-bottom))',
+      },
+      transitionDuration: {
+        '150': '150ms',
+        '200': '200ms',
+        '300': '300ms',
+        '400': '400ms',
       },
     },
   },

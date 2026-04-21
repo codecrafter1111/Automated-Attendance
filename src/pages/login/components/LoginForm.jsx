@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 import { Checkbox } from '../../../components/ui/Checkbox';
+import { verifyBiometric, isStudentEnrolled, isBiometricAvailable } from '../../../utils/biometricService';
 
 const LoginForm = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -22,7 +24,7 @@ const LoginForm = () => {
   const mockCredentials = {
     student: { email: 'student@college.edu', password: 'student123' },
     faculty: { email: 'faculty@college.edu', password: 'faculty123' },
-    administrator: { email: 'admin@college.edu', password: 'admin123' }
+    administrator: { email: 'admin@college.edu', password: 'admin@123' }
   };
 
   const roleOptions = [
@@ -65,14 +67,22 @@ const LoginForm = () => {
         
         localStorage.setItem('user', JSON.stringify(userData));
         
-        // Navigate based on role
-        const dashboardRoutes = {
-          student: '/student-dashboard',
-          faculty: '/faculty-dashboard',
-          administrator: '/faculty-dashboard'
-        };
-        
-        navigate(dashboardRoutes?.[formData?.role]);
+        // Check if there's a redirect parameter (from QR code scan)
+        const redirectTo = searchParams.get('redirect');
+        if (redirectTo) {
+          // Decode the redirect URL properly
+          const decodedRedirect = decodeURIComponent(redirectTo);
+          console.log('Redirecting to:', decodedRedirect);
+          navigate(decodedRedirect);
+        } else {
+          // Navigate based on role
+          const dashboardRoutes = {
+            student: '/student-dashboard',
+            faculty: '/faculty-dashboard',
+            administrator: '/faculty-dashboard'
+          };
+          navigate(dashboardRoutes?.[formData?.role]);
+        }
       } else {
         setError('Invalid credentials. Please check your email, password, and role selection.');
       }
@@ -80,9 +90,58 @@ const LoginForm = () => {
     }, 1500);
   };
 
-  const handleBiometricAuth = () => {
-    // Mock biometric authentication
-    setError('Biometric authentication is not available on this device');
+  const handleBiometricAuth = async () => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      // Check if biometric is available
+      const biometricInfo = await isBiometricAvailable();
+      if (!biometricInfo.isAvailable && !biometricInfo.webauthnSupported) {
+        setError('Biometric authentication is not available on this device. Please use your email and password instead.');
+        setLoading(false);
+        return;
+      }
+
+      // For demo purposes, we'll use a preset student ID
+      // In production, you'd need a way to identify the user before biometric verification
+      const demoStudentId = 'ST2024001';
+      
+      // Check if student has biometric enrollment
+      if (!isStudentEnrolled(demoStudentId)) {
+        setError(`No biometric enrollment found for this user. Please use email/password to login first, then enroll your biometric.`);
+        setLoading(false);
+        return;
+      }
+
+      // Verify biometric
+      const result = await verifyBiometric(demoStudentId);
+      
+      if (result.verified) {
+        // Store user data
+        const userData = {
+          name: 'Rahul Sharma',
+          email: 'student@college.edu',
+          role: 'student',
+          id: demoStudentId
+        };
+        
+        localStorage.setItem('user', JSON.stringify(userData));
+        
+        // Check if there's a redirect parameter (from QR code scan)
+        const redirectTo = searchParams.get('redirect');
+        if (redirectTo) {
+          navigate(redirectTo);
+        } else {
+          navigate('/student-dashboard');
+        }
+      }
+    } catch (err) {
+      setError(err.message || 'Biometric authentication failed. Please try again or use email/password login.');
+      console.error('Biometric auth error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

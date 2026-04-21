@@ -10,6 +10,7 @@ const StudentCard = ({
   onSelect, 
   onStatusChange, 
   onVerifyProxy,
+  onBiometricVerify,
   showProxyAlert 
 }) => {
   const getStatusColor = (status) => {
@@ -41,22 +42,23 @@ const StudentCard = ({
   };
 
   return (
-    <div className={`bg-card rounded-lg shadow-card border transition-smooth ${
-      isSelected ? 'border-primary ring-2 ring-primary/20' : 'border-border'
-    } ${showProxyAlert ? 'ring-2 ring-warning/50' : ''}`}>
+    <div className={`group bg-card rounded-lg border-2 transition-all duration-300 hover:shadow-card-hover hover:-translate-y-1 ${
+      isSelected ? 'border-primary shadow-card ring-2 ring-primary/30' : 'border-border hover:border-primary/50'
+    } ${showProxyAlert ? 'ring-2 ring-warning/50 border-warning/50' : 'overflow-hidden'}`}>
       {/* Proxy Alert Banner */}
       {showProxyAlert && (
-        <div className="bg-warning text-warning-foreground px-4 py-2 rounded-t-lg flex items-center justify-between">
+        <div className="bg-gradient-to-r from-warning/20 to-warning/10 px-4 py-3 border-b-2 border-warning/30 flex items-center justify-between animate-pulse">
           <div className="flex items-center space-x-2">
-            <Icon name="AlertTriangle" size={16} />
-            <span className="text-sm font-medium">Proxy Attendance Detected</span>
+            <Icon name="AlertTriangle" size={16} className="text-warning" />
+            <span className="text-sm font-bold text-warning">⚠️ Proxy Detected</span>
           </div>
           <Button
-            variant="ghost"
+            variant="warning"
             size="sm"
             onClick={() => onVerifyProxy(student?.id)}
             iconName="Eye"
             iconSize={14}
+            className="shadow-button"
           >
             Verify
           </Button>
@@ -64,18 +66,110 @@ const StudentCard = ({
       )}
       <div className="p-4">
         {/* Header with selection and status */}
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <Checkbox
             checked={isSelected}
             onChange={() => onSelect(student?.id)}
+            className="w-5 h-5 cursor-pointer"
           />
           <div className="flex items-center space-x-2">
-            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(student?.status)}`}>
-              <Icon name={getStatusIcon(student?.status)} size={12} className="inline mr-1" />
-              {student?.status?.charAt(0)?.toUpperCase() + student?.status?.slice(1)}
+            <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1 ${
+              getStatusColor(student?.status) === 'bg-success text-success-foreground' ? 'bg-success/20 text-success' :
+              getStatusColor(student?.status) === 'bg-error text-error-foreground' ? 'bg-error/20 text-error' :
+              getStatusColor(student?.status) === 'bg-warning text-warning-foreground' ? 'bg-warning/20 text-warning' :
+              'bg-muted/20 text-muted-foreground'
+            }`}>
+              <Icon name={getStatusIcon(student?.status)} size={14} />
+              <span>{student?.status?.charAt(0)?.toUpperCase() + student?.status?.slice(1)}</span>
             </span>
           </div>
         </div>
+
+        {/* Student Info */}
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="relative">
+            <Image
+              src={student?.photo}
+              alt={student?.name}
+              className="w-14 h-14 rounded-lg object-cover shadow-md group-hover:shadow-lg transition-shadow duration-300"
+            />
+            {student?.verificationMethod && (
+              <div className={`absolute -bottom-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-md ${
+                student?.verificationMethod === 'biometric' ? 'bg-success' :
+                student?.verificationMethod === 'qr' ? 'bg-primary' :
+                student?.verificationMethod === 'face' ? 'bg-secondary' :
+                'bg-muted'
+              }`}>
+                <Icon 
+                  name={getVerificationIcon(student?.verificationMethod)} 
+                  size={14}
+                  color="white"
+                />
+              </div>
+            )}
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <h4 className="font-bold text-foreground truncate text-sm">{student?.name}</h4>
+            <p className="text-xs text-muted-foreground">Roll: {student?.rollNumber}</p>
+            {student?.timestamp && (
+              <p className="text-xs text-muted-foreground mt-1">
+                ✓ {new Date(student.timestamp)?.toLocaleTimeString()}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-3 gap-2 mb-2">
+          <Button
+            variant={student?.status === 'present' ? 'success' : 'outline'}
+            size="sm"
+            onClick={() => onStatusChange(student?.id, 'present')}
+            iconName="Check"
+            iconSize={14}
+            className={student?.status === 'present' ? 'shadow-button' : 'hover:border-success hover:text-success'}
+          >
+            Present
+          </Button>
+          
+          <Button
+            variant={student?.status === 'late' ? 'warning' : 'outline'}
+            size="sm"
+            onClick={() => onStatusChange(student?.id, 'late')}
+            iconName="Clock"
+            iconSize={14}
+            className={student?.status === 'late' ? 'shadow-button' : 'hover:border-warning hover:text-warning'}
+          >
+            Late
+          </Button>
+          
+          <Button
+            variant={student?.status === 'absent' ? 'danger' : 'outline'}
+            size="sm"
+            onClick={() => onStatusChange(student?.id, 'absent')}
+            iconName="X"
+            iconSize={14}
+            className={student?.status === 'absent' ? 'shadow-button' : 'hover:border-error hover:text-error'}
+          >
+            Absent
+          </Button>
+        </div>
+
+        {/* Biometric Verification Button */}
+        {onBiometricVerify && (
+          <Button
+            variant="outline"
+            size="sm"
+            fullWidth
+            onClick={() => onBiometricVerify(student?.id)}
+            iconName="Fingerprint"
+            iconSize={14}
+            className="hover:border-primary hover:text-primary hover:bg-primary/5"
+          >
+            Verify Biometric
+          </Button>
+        )}
 
         {/* Student Info */}
         <div className="flex items-center space-x-3 mb-4">
@@ -139,6 +233,21 @@ const StudentCard = ({
             Absent
           </Button>
         </div>
+
+        {/* Biometric Verification Button */}
+        {onBiometricVerify && (
+          <Button
+            variant="outline"
+            size="sm"
+            fullWidth
+            onClick={() => onBiometricVerify(student?.id)}
+            iconName="Fingerprint"
+            iconSize={14}
+            className="mt-2"
+          >
+            Verify Biometric
+          </Button>
+        )}
 
         {/* Additional Info */}
         {student?.notes && (

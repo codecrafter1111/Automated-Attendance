@@ -69,31 +69,31 @@ const HeaderNavigation = ({ user = null, onNavigate = () => {}, currentPath = '/
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-[1000] bg-card border-b border-border">
+      <header className="fixed top-0 left-0 right-0 z-[1000] bg-card/95 backdrop-blur-md border-b border-border shadow-card">
         <div className="flex items-center justify-between h-16 px-6">
           {/* Logo */}
           <div className="flex items-center">
             <button
               onClick={() => handleNavigation(user?.role === 'student' ? '/student-dashboard' : '/faculty-dashboard')}
-              className="flex items-center space-x-3 hover:opacity-80 transition-smooth"
+              className="flex items-center space-x-3 hover:opacity-80 transition-smooth group"
             >
-              <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center">
+              <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-200">
                 <Icon name="GraduationCap" size={20} color="white" />
               </div>
-              <span className="text-xl font-semibold text-foreground">AttendEase</span>
+              <span className="text-lg font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent hidden sm:inline">AttendEase</span>
             </button>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-2">
             {filteredNavItems?.map((item) => (
               <button
                 key={item?.path}
                 onClick={() => handleNavigation(item?.path)}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-smooth ${
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   location?.pathname === item?.path
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    ? 'bg-primary text-primary-foreground shadow-button'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted active:scale-95'
                 }`}
                 title={item?.tooltip}
               >
@@ -104,25 +104,34 @@ const HeaderNavigation = ({ user = null, onNavigate = () => {}, currentPath = '/
           </nav>
 
           {/* User Menu & Mobile Toggle */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {/* Theme Toggle */}
             <ThemeToggle />
             
             {user && (
-              <div className="hidden md:flex items-center space-x-3">
+              <div className="hidden md:flex items-center space-x-4">
+                <div className="h-8 w-px bg-border"></div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-foreground">{user?.name}</p>
+                  <p className="text-sm font-semibold text-foreground">{user?.name}</p>
                   <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
                 </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleNavigation('/account-settings')}
+                  iconName="Settings"
+                  iconSize={16}
+                  title="Account Settings"
+                  className="hover:bg-muted hover:scale-105"
+                />
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleLogout}
                   iconName="LogOut"
                   iconSize={16}
-                >
-                  Logout
-                </Button>
+                  className="hover:bg-error/10 hover:text-error"
+                />
               </div>
             )}
 
@@ -186,15 +195,26 @@ const HeaderNavigation = ({ user = null, onNavigate = () => {}, currentPath = '/
                     <p className="text-sm text-muted-foreground capitalize">{user?.role}</p>
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  fullWidth
-                  onClick={handleLogout}
-                  iconName="LogOut"
-                  iconPosition="left"
-                >
-                  Logout
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    fullWidth
+                    onClick={() => handleNavigation('/account-settings')}
+                    iconName="Settings"
+                    iconPosition="left"
+                  >
+                    Account Settings
+                  </Button>
+                  <Button
+                    variant="outline"
+                    fullWidth
+                    onClick={handleLogout}
+                    iconName="LogOut"
+                    iconPosition="left"
+                  >
+                    Logout
+                  </Button>
+                </div>
               </div>
             )}
           </div>
