@@ -7,6 +7,7 @@ import AttendanceMethodsPanel from './components/AttendanceMethodsPanel';
 import StudentListHeader from './components/StudentListHeader';
 import StudentCard from './components/StudentCard';
 import SessionControls from './components/SessionControls';
+import BiometricScannerModal from './components/BiometricScannerModal';
 import Icon from '../../components/AppIcon';
 
 
@@ -24,6 +25,8 @@ const ClassAttendanceMarking = () => {
   const [qrCodeVisible, setQrCodeVisible] = useState(false);
   const [biometricActive, setBiometricActive] = useState(false);
   const [faceRecognitionActive, setFaceRecognitionActive] = useState(false);
+  const [biometricScannerOpen, setBiometricScannerOpen] = useState(false);
+  const [biometricMode, setBiometricMode] = useState('verify'); // 'verify' or 'enroll'
 
   // Student list state
   const [searchTerm, setSearchTerm] = useState('');
@@ -241,11 +244,36 @@ const ClassAttendanceMarking = () => {
   };
 
   const handleToggleBiometric = () => {
-    setBiometricActive(!biometricActive);
+    if (!biometricActive) {
+      // Opening biometric scanner
+      setBiometricMode('verify');
+      setBiometricScannerOpen(true);
+    } else {
+      setBiometricActive(false);
+    }
   };
 
   const handleToggleFaceRecognition = () => {
     setFaceRecognitionActive(!faceRecognitionActive);
+  };
+
+  const handleBiometricSuccess = (result) => {
+    if (biometricMode === 'verify') {
+      // Mark the verified student as present
+      handleStatusChange(result.studentId, 'present');
+      setBiometricActive(true);
+      setBiometricScannerOpen(false);
+    } else {
+      // Enrollment successful, continue scanning
+      setBiometricScannerOpen(false);
+    }
+  };
+
+  const handleBiometricVerifyStudent = (studentId) => {
+    // Open biometric scanner for a specific student
+    setBiometricMode('verify');
+    setBiometricScannerOpen(true);
+    // The modal will handle student selection
   };
 
   // Handle session controls
@@ -351,6 +379,7 @@ const ClassAttendanceMarking = () => {
                 onSelect={handleStudentSelect}
                 onStatusChange={handleStatusChange}
                 onVerifyProxy={handleVerifyProxy}
+                onBiometricVerify={handleBiometricVerifyStudent}
                 showProxyAlert={student?.id === 5} // Mock proxy alert for demo
               />
             ))}
@@ -380,6 +409,15 @@ const ClassAttendanceMarking = () => {
           />
         </div>
       </main>
+
+      {/* Biometric Scanner Modal */}
+      <BiometricScannerModal
+        isOpen={biometricScannerOpen}
+        onClose={() => setBiometricScannerOpen(false)}
+        onSuccess={handleBiometricSuccess}
+        students={students}
+        mode={biometricMode}
+      />
     </div>
   );
 };

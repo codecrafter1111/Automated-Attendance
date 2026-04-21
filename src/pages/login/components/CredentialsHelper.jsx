@@ -25,7 +25,7 @@ const CredentialsHelper = () => {
     {
       role: 'Administrator',
       email: 'admin@college.edu',
-      password: 'admin123',
+      password: 'admin@123',
       name: 'Admin Kumar',
       id: 'AD2024001',
       color: 'text-success'
@@ -94,7 +94,7 @@ const CredentialsHelper = () => {
           <div className="bg-warning/10 border border-warning/20 rounded-lg p-3">
             <div className="flex items-center space-x-2">
               <Icon name="AlertTriangle" size={14} className="text-warning" />
-              <p className="text-xs text-warning font-medium">
+         <p className="text-xs text-warning font-medium">
                 Demo purposes only - Use provided credentials exactly as shown
               </p>
             </div>

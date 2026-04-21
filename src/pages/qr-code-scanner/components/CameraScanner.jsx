@@ -3,11 +3,12 @@ import jsQR from 'jsqr';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
+const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, onCameraStatusChange, onUseManualEntry }) => {
 const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, onCameraStatusChange, onScanAttemptsUpdate }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
-  const [cameraStatus, setCameraStatus] = useState('initializing');
+  const [cameraStatus, setCameraStatus] = useState('ready');
   const [permissionState, setPermissionState] = useState('unknown');
   const [scanningActive, setScanningActive] = useState(false);
   const [detectedCode, setDetectedCode] = useState(null);
@@ -20,13 +21,6 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
       onCameraStatusChange(cameraStatus);
     }
   }, [cameraStatus, onCameraStatusChange]);
-
-  useEffect(() => {
-    checkCameraPermissions();
-    return () => {
-      stopCamera();
-    };
-  }, []);
 
   useEffect(() => {
     if (isScanning && cameraStatus === 'ready') {
@@ -83,7 +77,7 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
 
       // Check if getUserMedia is supported
       if (!navigator?.mediaDevices?.getUserMedia) {
-        throw new Error('Camera API not supported in this browser');
+        throw new Error('Camera API not supported in this browser. Please use Manual Entry.');
       }
 
       const constraints = {
@@ -94,7 +88,7 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
         }
       };
 
-      const stream = await navigator.mediaDevices?.getUserMedia(constraints);
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
 
       if (videoRef?.current) {
@@ -109,7 +103,7 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
               setCameraStatus('error');
               setErrorDetails({
                 title: 'Video Playback Failed',
-                message: 'Unable to start video stream. Please refresh and try again.',
+                message: 'Unable to start video stream. Try using Manual Entry instead.',
                 action: 'Retry'
               });
             });
@@ -132,52 +126,47 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
   };
 
   const handleCameraError = (error) => {
+    const errorMsg = error?.message || error?.toString() || 'Unknown error';
+    console.error('Camera error:', errorMsg);
+    
     if (error?.name === 'NotAllowedError' || error?.name === 'PermissionDeniedError') {
       setCameraStatus('permission_denied');
       setPermissionState('denied');
       setErrorDetails({
         title: 'Camera Permission Denied',
-        message: 'Please allow camera access to scan QR codes. Click the camera icon in your browser\'s address bar and select "Allow".',
+        message: 'Please allow camera access to use the scanner.',
         action: 'Grant Permission',
         instructions: [
           '1. Look for the camera icon in your browser\'s address bar',
-          '2. Click it and select "Allow" or "Always allow"',
-          '3. Refresh the page if needed'
+          '2. Click it and select "Allow"',
+          '3. Refresh the page'
         ]
       });
-      onScanError?.('Camera access denied. Please enable camera permissions.');
+      onScanError?.('Camera permission denied');
     } else if (error?.name === 'NotFoundError' || error?.name === 'DevicesNotFoundError') {
       setCameraStatus('no_camera');
       setErrorDetails({
         title: 'No Camera Found',
-        message: 'No camera device was detected on this device.',
-        action: 'Check Device'
+        message: 'No camera device detected. Use Manual Entry instead.',
+        action: 'Use Manual Entry'
       });
-      onScanError?.('No camera found on this device.');
+      onScanError?.('No camera found');
     } else if (error?.name === 'NotReadableError' || error?.name === 'TrackStartError') {
       setCameraStatus('camera_busy');
       setErrorDetails({
         title: 'Camera In Use',
-        message: 'The camera is being used by another application. Please close other apps using the camera.',
-        action: 'Close Other Apps'
+        message: 'The camera is being used by another app. Close other apps and try again.',
+        action: 'Retry'
       });
-      onScanError?.('Camera is being used by another application.');
-    } else if (error?.name === 'OverconstrainedError' || error?.name === 'ConstraintNotSatisfiedError') {
-      setCameraStatus('unsupported');
-      setErrorDetails({
-        title: 'Camera Not Supported',
-        message: 'Your camera doesn\'t support the required features for QR scanning.',
-        action: 'Try Different Device'
-      });
-      onScanError?.('Camera configuration not supported.');
+      onScanError?.('Camera is in use by another application');
     } else {
       setCameraStatus('error');
       setErrorDetails({
         title: 'Camera Error',
-        message: error?.message || 'An unexpected error occurred while accessing the camera.',
-        action: 'Retry'
+        message: 'Camera initialization failed. Try Manual Entry instead.',
+        action: 'Use Manual Entry'
       });
-      onScanError?.('Camera initialization failed: ' + (error?.message || 'Unknown error'));
+      onScanError?.('Camera error: ' + errorMsg);
     }
   };
 
@@ -199,6 +188,13 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
     console.log('CameraScanner: Starting scan, camera status:', cameraStatus);
     setScanningActive(true);
     setScanAttempts(0);
+    
+    // Try to initialize camera only once when scanning starts
+    if (cameraStatus === 'ready' && !streamRef.current) {
+      initializeCamera();
+    }
+    
+    scanForQRCode();
     if (onScanAttemptsUpdate) {
       onScanAttemptsUpdate(0);
     }
@@ -220,7 +216,7 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
     const video = videoRef?.current;
     const context = canvas?.getContext('2d');
 
-    if (!canvas || !video || !context) return;
+    if (!canvas || !video || !context || !video.videoWidth) return;
 
     canvas.width = video?.videoWidth;
     canvas.height = video?.videoHeight;
@@ -235,6 +231,8 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
       return;
     }
 
+    // Simulate QR code detection
+    const mockDetection = Math.random() > 0.85;
     context?.drawImage(video, 0, 0, canvas?.width, canvas?.height);
     
     // Get image data for jsQR
@@ -346,37 +344,18 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
   const retryCamera = () => {
     stopCamera();
     setErrorDetails(null);
-    setCameraStatus('initializing');
+    setCameraStatus('ready');
     setTimeout(() => {
-      checkCameraPermissions();
+      if (isScanning) {
+        initializeCamera();
+      }
     }, 500);
-  };
-
-  const openBrowserSettings = () => {
-    // Guide user to browser settings
-    const userAgent = navigator?.userAgent?.toLowerCase();
-    let settingsUrl = '';
-    
-    if (userAgent?.includes('chrome')) {
-      settingsUrl = 'chrome://settings/content/camera';
-    } else if (userAgent?.includes('firefox')) {
-      settingsUrl = 'about:preferences#privacy';
-    } else if (userAgent?.includes('safari')) {
-      // Safari doesn't have a direct URL, provide instructions
-      alert('In Safari: Safari Menu > Preferences > Websites > Camera > Select "Allow" for this site');
-      return;
-    }
-    
-    if (settingsUrl) {
-      window.open(settingsUrl, '_blank');
-    } else {
-      alert('Please check your browser settings to enable camera access for this site.');
-    }
   };
 
   const renderCameraStatus = () => {
     switch (cameraStatus) {
-      case 'initializing': case'checking_permissions':
+      case 'initializing':
+      case 'checking_permissions':
         return (
           <div className="flex flex-col items-center justify-center h-full bg-muted rounded-lg p-8">
             <div className="animate-spin mb-4">
@@ -420,18 +399,21 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
                 ))}
               </div>
             )}
-            <div className="flex space-x-2">
-              <Button variant="outline" onClick={retryCamera} iconName="RefreshCw">
+            <div className="flex flex-col space-y-2 w-full max-w-sm">
+              <Button variant="outline" onClick={retryCamera} iconName="RefreshCw" className="w-full">
                 Try Again
               </Button>
-              <Button variant="primary" onClick={openBrowserSettings} iconName="Settings">
-                Browser Settings
+              <Button variant="ghost" onClick={() => onUseManualEntry?.()} iconName="Edit" className="w-full">
+                Use Manual Entry Instead
               </Button>
             </div>
           </div>
         );
 
-      case 'no_camera': case'camera_busy': case'unsupported': case'error':
+      case 'no_camera':
+      case 'camera_busy':
+      case 'unsupported':
+      case 'error':
         return (
           <div className="flex flex-col items-center justify-center h-full bg-muted rounded-lg p-8">
             <Icon 
@@ -442,12 +424,27 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
               className="text-error mb-4" 
             />
             <p className="text-foreground font-medium mb-2">{errorDetails?.title}</p>
-            <p className="text-muted-foreground text-sm text-center mb-4">
+            <p className="text-muted-foreground text-sm text-center mb-6 max-w-sm">
               {errorDetails?.message}
             </p>
-            <Button variant="outline" onClick={retryCamera} iconName="RefreshCw">
-              {errorDetails?.action || 'Retry'}
-            </Button>
+            <div className="flex flex-col space-y-2 w-full max-w-sm">
+              <Button 
+                variant="outline" 
+                onClick={retryCamera} 
+                iconName="RefreshCw"
+                className="w-full"
+              >
+                {errorDetails?.action?.split(' ')[0] === 'Use' ? 'Use Manual Entry' : errorDetails?.action || 'Retry'}
+              </Button>
+              <Button 
+                variant="ghost" 
+                onClick={() => onUseManualEntry?.()} 
+                iconName="Edit"
+                className="w-full"
+              >
+                Use Manual Entry Instead
+              </Button>
+            </div>
           </div>
         );
 

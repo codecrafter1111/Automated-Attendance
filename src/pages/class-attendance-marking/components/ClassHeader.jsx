@@ -26,34 +26,34 @@ const ClassHeader = ({
   };
 
   return (
-    <div className="bg-card rounded-lg shadow-card border border-border p-6 mb-6">
+    <div className="bg-gradient-to-br from-card to-card/50 rounded-lg shadow-card border border-border p-6 mb-6 hover:shadow-card-hover transition-shadow duration-300">
       {/* Class Information */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
         <div className="mb-4 lg:mb-0">
           <div className="flex items-center space-x-3 mb-2">
             <h1 className="text-2xl font-bold text-foreground">{classInfo?.subject}</h1>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-              classInfo?.status === 'active' ?'bg-success text-success-foreground' :'bg-warning text-warning-foreground'
+            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+              classInfo?.status === 'active' ?'bg-success/20 text-success' :'bg-warning/20 text-warning'
             }`}>
-              {classInfo?.status === 'active' ? 'Live Session' : 'Scheduled'}
+              {classInfo?.status === 'active' ? '🔴 Live Session' : '⏱️ Scheduled'}
             </span>
           </div>
           
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center space-x-2">
-              <Icon name="Clock" size={16} />
+            <div className="flex items-center space-x-2 hover:text-foreground transition-colors">
+              <Icon name="Clock" size={16} className="text-primary" />
               <span>{classInfo?.time}</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <Icon name="MapPin" size={16} />
+            <div className="flex items-center space-x-2 hover:text-foreground transition-colors">
+              <Icon name="MapPin" size={16} className="text-primary" />
               <span>{classInfo?.room}</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <Icon name="Calendar" size={16} />
+            <div className="flex items-center space-x-2 hover:text-foreground transition-colors">
+              <Icon name="Calendar" size={16} className="text-primary" />
               <span>{classInfo?.date}</span>
             </div>
-            <div className="flex items-center space-x-2">
-              <Icon name="Users" size={16} />
+            <div className="flex items-center space-x-2 hover:text-foreground transition-colors">
+              <Icon name="Users" size={16} className="text-primary" />
               <span>{attendanceStats?.total} Students</span>
             </div>
           </div>
@@ -61,29 +61,29 @@ const ClassHeader = ({
 
         {/* Offline Mode Indicator */}
         {isOfflineMode && (
-          <div className="flex items-center space-x-2 px-3 py-2 bg-warning rounded-lg">
-            <Icon name="WifiOff" size={16} className="text-warning-foreground" />
-            <span className="text-sm font-medium text-warning-foreground">Offline Mode</span>
+          <div className="flex items-center space-x-2 px-4 py-2 bg-warning/10 border border-warning/30 rounded-lg animate-pulse">
+            <Icon name="WifiOff" size={16} className="text-warning" />
+            <span className="text-sm font-semibold text-warning">Offline Mode</span>
           </div>
         )}
       </div>
       {/* Attendance Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-muted rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-success">{attendanceStats?.present}</div>
-          <div className="text-sm text-muted-foreground">Present</div>
+        <div className="bg-gradient-to-br from-success/10 to-success/5 rounded-lg p-4 text-center border border-success/20 hover:border-success/40 transition-colors">
+          <div className="text-3xl font-bold text-success">{attendanceStats?.present}</div>
+          <div className="text-xs text-muted-foreground font-medium mt-1">Present</div>
         </div>
-        <div className="bg-muted rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-error">{attendanceStats?.absent}</div>
-          <div className="text-sm text-muted-foreground">Absent</div>
+        <div className="bg-gradient-to-br from-error/10 to-error/5 rounded-lg p-4 text-center border border-error/20 hover:border-error/40 transition-colors">
+          <div className="text-3xl font-bold text-error">{attendanceStats?.absent}</div>
+          <div className="text-xs text-muted-foreground font-medium mt-1">Absent</div>
         </div>
-        <div className="bg-muted rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-warning">{attendanceStats?.late}</div>
-          <div className="text-sm text-muted-foreground">Late</div>
+        <div className="bg-gradient-to-br from-warning/10 to-warning/5 rounded-lg p-4 text-center border border-warning/20 hover:border-warning/40 transition-colors">
+          <div className="text-3xl font-bold text-warning">{attendanceStats?.late}</div>
+          <div className="text-xs text-muted-foreground font-medium mt-1">Late</div>
         </div>
-        <div className="bg-muted rounded-lg p-4 text-center">
-          <div className="text-2xl font-bold text-primary">{getAttendancePercentage()}%</div>
-          <div className="text-sm text-muted-foreground">Attendance</div>
+        <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg p-4 text-center border border-primary/20 hover:border-primary/40 transition-colors">
+          <div className="text-3xl font-bold text-primary">{getAttendancePercentage()}%</div>
+          <div className="text-xs text-muted-foreground font-medium mt-1">Attendance</div>
         </div>
       </div>
       {/* Action Buttons */}
@@ -93,6 +93,7 @@ const ClassHeader = ({
           onClick={onGenerateQR}
           iconName="QrCode"
           iconPosition="left"
+          className="shadow-button hover:shadow-lg"
         >
           Generate QR Code
         </Button>
@@ -102,8 +103,9 @@ const ClassHeader = ({
           onClick={onToggleBiometric}
           iconName="Fingerprint"
           iconPosition="left"
+          className={biometricActive ? "shadow-button" : ""}
         >
-          {biometricActive ? 'Biometric Active' : 'Enable Biometric'}
+          {biometricActive ? '✓ Biometric Active' : 'Enable Biometric'}
         </Button>
         
         <Button
@@ -111,8 +113,9 @@ const ClassHeader = ({
           onClick={onToggleFaceRecognition}
           iconName="Camera"
           iconPosition="left"
+          className={faceRecognitionActive ? "shadow-button" : ""}
         >
-          {faceRecognitionActive ? 'Face Recognition On' : 'Enable Face Recognition'}
+          {faceRecognitionActive ? '✓ Face Recognition On' : 'Enable Face Recognition'}
         </Button>
       </div>
     </div>
