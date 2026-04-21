@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
@@ -9,7 +11,8 @@ const AttendanceMethodsPanel = ({
   faceRecognitionActive,
   onBulkMarkPresent,
   onBulkMarkAbsent,
-  selectedStudents 
+  selectedStudents,
+  classInfo // Add classInfo prop to get actual class data
 }) => {
   const [networkURL, setNetworkURL] = useState('');
   const [isLocalhost, setIsLocalhost] = useState(false);
@@ -47,6 +50,66 @@ const AttendanceMethodsPanel = ({
   console.log('🔗 QR Code URL:', qrData);
   console.log('📱 Network URL:', baseURL);
   console.log('🚨 Localhost?', isLocalhost);
+  // State to force QR code regeneration
+  const [qrRefreshKey, setQrRefreshKey] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(30);
+
+  // Auto-refresh QR code every 30 seconds
+  useEffect(() => {
+    if (!qrCodeVisible) {
+      setQrRefreshKey(0);
+      setTimeRemaining(30);
+      return;
+    }
+
+    // Reset timer when QR becomes visible
+    setTimeRemaining(30);
+    
+    // Countdown timer
+    const countdownInterval = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) {
+          return 30; // Reset to 30 when it hits 0
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    // Refresh QR code every 30 seconds
+    const refreshInterval = setInterval(() => {
+      setQrRefreshKey(prev => prev + 1);
+      setTimeRemaining(30);
+      console.log('QR Code refreshed for security');
+    }, 30000);
+
+    return () => {
+      clearInterval(countdownInterval);
+      clearInterval(refreshInterval);
+    };
+  }, [qrCodeVisible]);
+
+  // Generate QR code data with proper structure
+  const qrCodeData = useMemo(() => {
+    const sessionId = 'sess_' + Math.random()?.toString(36)?.substr(2, 9);
+    const timestamp = Date.now();
+    
+    // Create structured data that matches what scanner expects
+    const data = {
+      classId: classInfo?.id || 'CLASS-12345',
+      className: classInfo?.subject || 'Unknown Class',
+      timestamp: timestamp,
+      location: classInfo?.location || 'Room A-101',
+      sessionId: sessionId,
+      faculty: classInfo?.faculty || 'Faculty Name',
+      expiresIn: 30 // Expires in 30 seconds
+    };
+    
+    // Return JSON string for QR code
+    return JSON.stringify(data);
+  }, [classInfo, qrRefreshKey]); // Re-generate when qrRefreshKey changes
+
+  // Alternative: Use simple string format for backward compatibility
+  // const qrCodeData = `AttendEase-Class-${classInfo?.id || '12345'}-Session-${Date.now()}`;
 
   if (!qrCodeVisible && !biometricActive && !faceRecognitionActive) {
     return null;
@@ -130,7 +193,17 @@ const AttendanceMethodsPanel = ({
                 src={qrCode} 
                 alt="Attendance QR Code" 
                 className="w-32 h-32 mx-auto"
+            <div className="bg-white p-4 rounded-lg mb-3 inline-block relative">
+              <QRCodeSVG 
+                value={qrCodeData}
+                size={128}
+                level="H"
+                includeMargin={true}
               />
+              {/* Countdown overlay */}
+              <div className="absolute top-2 right-2 bg-primary text-white text-xs font-bold rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                {timeRemaining}s
+              </div>
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4 text-left">
               <p className="text-xs font-mono text-blue-900 break-all">
@@ -141,6 +214,21 @@ const AttendanceMethodsPanel = ({
               Students can scan this QR code to mark attendance
             </p>
             <div className="flex items-center justify-center space-x-2 text-xs text-success font-semibold">
+            <p className="text-sm text-muted-foreground mb-2">
+              Students can scan this QR code to mark attendance
+            </p>
+            <div className="flex items-center justify-center space-x-2 mb-2">
+              <div className="flex-1 bg-border rounded-full h-1.5 overflow-hidden">
+                <div 
+                  className="bg-success h-full transition-all duration-1000 ease-linear"
+                  style={{ width: `${(timeRemaining / 30) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mb-2">
+              Auto-refreshing in {timeRemaining} seconds
+            </p>
+            <div className="flex items-center justify-center space-x-2 text-xs text-success">
               <Icon name="Wifi" size={12} />
               <span>Live & Active</span>
               <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>

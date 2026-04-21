@@ -10,6 +10,9 @@ import StudentDashboard from './pages/student-dashboard';
 import StudentAttendanceHistory from './pages/student-attendance-history';
 import ClassAttendanceMarking from './pages/class-attendance-marking';
 import AccountSettings from './pages/account-settings';
+import Events from './pages/events';
+import Assignments from './pages/assignments';
+import Performance from './pages/performance';
 
 const Routes = () => {
   return (
@@ -26,6 +29,9 @@ const Routes = () => {
         <Route path="/student-attendance-history" element={<StudentAttendanceHistory />} />
         <Route path="/class-attendance-marking" element={<ClassAttendanceMarking />} />
         <Route path="/account-settings" element={<AccountSettings />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/assignments" element={<Assignments />} />
+        <Route path="/performance" element={<Performance />} />
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
       </ErrorBoundary>
