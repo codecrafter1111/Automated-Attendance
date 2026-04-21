@@ -49,11 +49,11 @@ const AttendanceBreakdown = ({ data }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-[#1A1A1A] rounded-xl p-6 border-2 border-slate-300 dark:border-[#1B1B1B] hover:shadow-2xl dark:hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-slate-900/50 transition-all">
+    <div className="bg-card rounded-xl p-6 border border-border hover:shadow-card hover:shadow-card-hover transition-all">
       {/* Header */}
       <div className="mb-6">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Attendance Breakdown</h3>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+        <h3 className="text-lg font-bold text-foreground">Attendance Breakdown</h3>
+        <p className="text-sm text-muted-foreground mt-1">
           Distribution of attendance status
         </p>
       </div>
@@ -84,11 +84,11 @@ const AttendanceBreakdown = ({ data }) => {
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: item.color }}
                 />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <span className="text-sm font-medium text-foreground">
                   {item.label}
                 </span>
               </div>
-              <span className="text-sm font-bold text-slate-900 dark:text-white">
+              <span className="text-sm font-bold text-foreground">
                 {item.percentage}%
               </span>
             </div>
@@ -97,12 +97,12 @@ const AttendanceBreakdown = ({ data }) => {
       </div>
 
       {/* Stats Summary */}
-      <div className="mt-6 pt-6 border-t border-slate-300 dark:border-slate-700">
+      <div className="mt-6 pt-6 border-t border-border">
         <div className="grid grid-cols-3 gap-4 text-center">
           {data.map((item, idx) => (
             <div key={idx}>
-              <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">{item.label}</p>
-              <p className="text-lg font-bold text-slate-900 dark:text-white">{item.count}</p>
+              <p className="text-xs text-muted-foreground mb-1">{item.label}</p>
+              <p className="text-lg font-bold text-foreground">{item.count}</p>
             </div>
           ))}
         </div>

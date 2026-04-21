@@ -66,20 +66,20 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
 
       {/* Modal */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-3xl mx-4 max-h-screen overflow-y-auto">
-        <div className="bg-white rounded-xl shadow-2xl border-2 border-slate-200 overflow-hidden">
+        <div className="bg-card rounded-xl shadow-card border border-border overflow-hidden">
           {/* Header */}
-          <div className="p-6 border-b border-slate-200 flex items-start justify-between sticky top-0 bg-white">
+          <div className="p-6 border-b border-border flex items-start justify-between sticky top-0 bg-card">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-foreground">
                 {assignment?.id ? 'Edit Assignment' : 'Create Assignment'}
               </h2>
-              <p className="text-sm text-slate-600 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 {assignment?.id ? 'Update assignment details' : 'Create a new assignment for students'}
               </p>
             </div>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-muted-foreground hover:text-muted-foreground transition-colors"
             >
               <Icon name="X" size={20} />
             </button>
@@ -89,7 +89,7 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {/* Title */}
             <div>
-              <label className="block text-sm font-bold text-slate-900 mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Assignment Title *
               </label>
               <Input
@@ -105,7 +105,7 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
             {/* Description & Subject Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-bold text-slate-900 mb-2">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   Description *
                 </label>
                 <textarea
@@ -115,12 +115,12 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
                   placeholder="Brief description of the assignment"
                   rows="3"
                   required
-                  className="w-full px-4 py-2 rounded-lg bg-white border-2 border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-none transition-all"
+                  className="w-full px-4 py-2 rounded-lg bg-card border-2 border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-900 mb-2">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   Subject *
                 </label>
                 <Input
@@ -137,7 +137,7 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
             {/* Instructor & Points Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-bold text-slate-900 mb-2">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   Instructor *
                 </label>
                 <Input
@@ -151,7 +151,7 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-900 mb-2">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   Points *
                 </label>
                 <Input
@@ -168,7 +168,7 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
             {/* Due Date & Time Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-bold text-slate-900 mb-2">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   Due Date *
                 </label>
                 <Input
@@ -181,7 +181,7 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-900 mb-2">
+                <label className="block text-sm font-bold text-foreground mb-2">
                   Due Time *
                 </label>
                 <Input
@@ -196,7 +196,7 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
 
             {/* Instructions */}
             <div>
-              <label className="block text-sm font-bold text-slate-900 mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Instructions
               </label>
               <textarea
@@ -205,29 +205,29 @@ const CreateAssignmentModal = ({ assignment, isOpen, onClose, onSave, isLoading 
                 onChange={handleInputChange}
                 placeholder="Detailed instructions for students..."
                 rows="4"
-                className="w-full px-4 py-2 rounded-lg bg-white border-2 border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-none transition-all"
+                className="w-full px-4 py-2 rounded-lg bg-card border-2 border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none transition-all"
               />
             </div>
 
             {/* Late Submission Checkbox */}
-            <div className="flex items-center gap-3 bg-slate-50 rounded-lg p-4 border-2 border-slate-200">
+            <div className="flex items-center gap-3 bg-muted/20 rounded-lg p-4 border border-border">
               <input
                 type="checkbox"
                 id="lateSubmission"
                 name="lateSubmissionAllowed"
                 checked={formData.lateSubmissionAllowed}
                 onChange={handleInputChange}
-                className="w-4 h-4 rounded cursor-pointer accent-blue-500"
+                className="w-4 h-4 rounded cursor-pointer accent-primary"
               />
               <label htmlFor="lateSubmission" className="cursor-pointer flex-1">
-                <p className="text-sm font-semibold text-slate-900">Allow Late Submissions</p>
-                <p className="text-xs text-slate-600">Students can submit after the due date</p>
+                <p className="text-sm font-semibold text-foreground">Allow Late Submissions</p>
+                <p className="text-xs text-muted-foreground">Students can submit after the due date</p>
               </label>
             </div>
           </form>
 
           {/* Footer */}
-          <div className="p-6 border-t border-slate-200 flex gap-3 justify-end sticky bottom-0 bg-white">
+          <div className="p-6 border-t border-border flex gap-3 justify-end sticky bottom-0 bg-card">
             <Button
               variant="outline"
               onClick={onClose}

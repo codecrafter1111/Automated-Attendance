@@ -285,8 +285,8 @@ const Assignments = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-background">
-        <Icon name="Loader" size={40} className="text-primary animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p>Loading...</p>
       </div>
     );
   }
@@ -297,7 +297,7 @@ const Assignments = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0A0A0A]">
+    <div className="min-h-screen bg-background">
       <HeaderNavigation user={user} />
       
       <main className="pt-24 pb-12">
@@ -308,10 +308,10 @@ const Assignments = () => {
           {/* Header Section */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 mt-8 gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+              <h1 className="text-3xl font-bold text-foreground mb-2">
                 {user?.role === 'student' ? 'My Assignments' : 'Manage Assignments'}
               </h1>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="text-muted-foreground">
                 {user?.role === 'student' ? 'View and submit your assignments' : 'Create and manage student assignments'}
               </p>
             </div>

@@ -36,7 +36,7 @@ const ScanningControls = ({
   return (
     <div className="space-y-4">
       {/* Primary Controls */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-col gap-3">
         <Button
           variant={isScanning ? "destructive" : "default"}
           size="lg"
@@ -48,7 +48,7 @@ const ScanningControls = ({
         >
           {getScanButtonText()}
         </Button>
-
+  
         <Button
           variant="outline"
           size="lg"

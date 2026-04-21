@@ -90,7 +90,7 @@ const HeaderNavigation = ({ user = null, onNavigate = () => {}, currentPath = '/
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-[1000] bg-card/95 backdrop-blur-md border-b border-border shadow-card">
+      <header className="fixed top-0 left-0 right-0 z-[1000] bg-card/95 backdrop-blur-md  border-b border-border shadow-card">
         <div className="flex items-center justify-between h-16 px-6">
           {/* Logo */}
           <div className="flex items-center">
@@ -98,10 +98,10 @@ const HeaderNavigation = ({ user = null, onNavigate = () => {}, currentPath = '/
               onClick={() => handleNavigation(user?.role === 'student' ? '/student-dashboard' : '/faculty-dashboard')}
               className="flex items-center space-x-3 hover:opacity-80 transition-smooth group"
             >
-              <div className="w-9 h-9 bg-gradient-to-br from-primary to-primary/80 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-200">
+              <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-200">
                 <Icon name="GraduationCap" size={20} color="white" />
               </div>
-              <span className="text-lg font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent hidden sm:inline">AttendEase</span>
+              <span className="text-lg font-bold text-foreground hidden sm:inline">AttendEase</span>
             </button>
           </div>
 

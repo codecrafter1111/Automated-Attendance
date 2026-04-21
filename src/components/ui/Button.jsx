@@ -9,15 +9,15 @@ const buttonVariants = cva(
     {
         variants: {
             variant: {
-                default: "bg-gradient-to-br from-primary to-primary/90 text-primary-foreground shadow-button hover:shadow-lg hover:from-primary/95 hover:to-primary/80",
-                destructive: "bg-gradient-to-br from-error to-error/90 text-error-foreground shadow-button hover:shadow-lg hover:from-error/95 hover:to-error/80",
+                default: "bg-primary text-primary-foreground shadow-card hover:shadow-card-hover",
+                destructive: "bg-error text-error-foreground shadow-card hover:shadow-card-hover",
                 outline: "border-2 border-primary text-primary hover:bg-primary/5 active:bg-primary/10",
-                secondary: "bg-gradient-to-br from-secondary to-secondary/90 text-secondary-foreground shadow-button hover:shadow-lg hover:from-secondary/95 hover:to-secondary/80",
+                secondary: "bg-secondary text-secondary-foreground shadow-card hover:shadow-card-hover",
                 ghost: "text-foreground hover:bg-muted hover:text-primary transition-smooth",
                 link: "text-primary underline-offset-4 hover:underline",
-                success: "bg-gradient-to-br from-success to-success/90 text-success-foreground shadow-button hover:shadow-lg hover:from-success/95 hover:to-success/80",
-                warning: "bg-gradient-to-br from-warning to-warning/90 text-warning-foreground shadow-button hover:shadow-lg hover:from-warning/95 hover:to-warning/80",
-                danger: "bg-gradient-to-br from-error to-error/90 text-error-foreground shadow-button hover:shadow-lg hover:from-error/95 hover:to-error/80",
+                success: "bg-success text-success-foreground shadow-card hover:shadow-card-hover",
+                warning: "bg-warning text-warning-foreground shadow-card hover:shadow-card-hover",
+                danger: "bg-error text-error-foreground shadow-card hover:shadow-card-hover",
             },
             size: {
                 default: "h-10 px-4 py-2",

@@ -7,7 +7,7 @@ const PerformanceStatsCards = ({ stats }) => {
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="bg-white dark:bg-[#1A1A1A] rounded-xl p-6 border-2 border-slate-300 dark:border-[#1B1B1B] hover:shadow-2xl dark:hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-slate-900/50 transition-all"
+          className="bg-card rounded-xl p-6 border border-border hover:shadow-card hover:shadow-card-hover transition-all"
         >
           {/* Icon */}
           <div className="flex items-center justify-between mb-4">
@@ -25,13 +25,13 @@ const PerformanceStatsCards = ({ stats }) => {
           </div>
 
           {/* Content */}
-          <p className="text-slate-600 dark:text-slate-400 text-sm font-medium mb-1">
+          <p className="text-muted-foreground text-sm font-medium mb-1">
             {stat.label}
           </p>
-          <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-1">
+          <h3 className="text-3xl font-bold text-foreground mb-1">
             {stat.value}
           </h3>
-          <p className="text-xs text-slate-600 dark:text-slate-400">
+          <p className="text-xs text-muted-foreground">
             {stat.description}
           </p>
         </div>

@@ -20,44 +20,44 @@ const Performance = () => {
       value: '3.7',
       description: '+0.2 from last semester',
       icon: 'Award',
-      bgColor: 'bg-yellow-100 dark:bg-yellow-900/30',
-      iconColor: 'text-yellow-600 dark:text-yellow-400',
+      bgColor: 'bg-warning/20',
+      iconColor: 'text-warning',
       trend: '+0.2',
       trendIcon: 'TrendingUp',
-      trendColor: 'text-emerald-600 dark:text-emerald-400'
+      trendColor: 'text-success'
     },
     {
       label: 'Attendance Rate',
       value: '86%',
       description: 'Above class average',
       icon: 'CheckCircle',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
-      iconColor: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-primary/20',
+      iconColor: 'text-primary',
       trend: '+3%',
       trendIcon: 'TrendingUp',
-      trendColor: 'text-emerald-600 dark:text-emerald-400'
+      trendColor: 'text-success'
     },
     {
       label: 'Assignment Score',
       value: '90%',
       description: '59/65 completed',
       icon: 'CheckCircle2',
-      bgColor: 'bg-purple-100 dark:bg-purple-900/30',
-      iconColor: 'text-purple-600 dark:text-purple-400',
+      bgColor: 'bg-secondary/20',
+      iconColor: 'text-secondary',
       trend: '+5%',
       trendIcon: 'TrendingUp',
-      trendColor: 'text-emerald-600 dark:text-emerald-400'
+      trendColor: 'text-success'
     },
     {
       label: 'Class Rank',
       value: '8th',
       description: 'out of 45 students',
       icon: 'Flame',
-      bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
-      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      bgColor: 'bg-success/20',
+      iconColor: 'text-success',
       trend: '+1',
       trendIcon: 'TrendingUp',
-      trendColor: 'text-emerald-600 dark:text-emerald-400'
+      trendColor: 'text-success'
     }
   ];
 
@@ -181,21 +181,20 @@ const Performance = () => {
   ];
 
   // Get current user from localStorage
-  const user = JSON.parse(localStorage.getItem('currentUser')) || {
+  const user = JSON.parse(localStorage.getItem('user')) || {
     name: 'John Doe',
-    studentId: 'CS2021001',
-    role: 'student'
+    role: 'student',
+    studentId: '12345'
   };
 
   const handleExport = () => {
-    alert('Exporting performance report as PDF...');
-    // Export functionality would go here
+    console.log('Exporting performance data...');
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors">
+    <div className="min-h-screen bg-background transition-colors">
       {/* Header */}
-      <HeaderNavigation />
+      <HeaderNavigation user={user} />
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -203,17 +202,17 @@ const Performance = () => {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-foreground">
                 Academic Performance
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 mt-1">
+              <p className="text-muted-foreground mt-1">
                 Comprehensive view of your academic progress
               </p>
             </div>
             <div className="flex gap-3">
               <button
                 onClick={handleExport}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white border-2 border-slate-300 dark:border-[#1B1B1B] hover:shadow-lg dark:hover:shadow-lg transition-all hover:bg-slate-50 dark:hover:bg-slate-700"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-card text-foreground border-2 border-border hover:shadow-card hover:bg-accent hover:text-accent-foreground transition-all"
               >
                 <Icon name="Download" size={16} />
                 Export
@@ -225,13 +224,13 @@ const Performance = () => {
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Semester Filter */}
             <div>
-              <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Semester
               </label>
               <select
                 value={semester}
                 onChange={(e) => setSemester(e.target.value)}
-                className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white border-2 border-slate-300 dark:border-[#1A1A1A] hover:border-blue-500 dark:hover:border-blue-400 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                className="px-4 py-2 rounded-xl bg-card text-foreground border-2 border-border hover:border-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               >
                 <option value="current">This Semester</option>
                 <option value="previous">Previous Semester</option>
@@ -241,13 +240,13 @@ const Performance = () => {
 
             {/* Subject Filter */}
             <div>
-              <label className="block text-sm font-bold text-slate-900 dark:text-white mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Subject
               </label>
               <select
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                className="px-4 py-2 rounded-xl bg-white dark:bg-[#1A1A1A] text-slate-900 dark:text-white border-2 border-slate-300 dark:border-[#1A1A1A] hover:border-blue-500 dark:hover:border-blue-400 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                className="px-4 py-2 rounded-xl bg-card text-foreground border-2 border-border hover:border-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               >
                 <option value="all">All Subjects</option>
                 <option value="ds">Data Structures</option>

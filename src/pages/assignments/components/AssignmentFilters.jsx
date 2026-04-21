@@ -14,13 +14,13 @@ const AssignmentFilters = ({
     <div className="flex flex-col gap-4 mb-8">
       {/* Search Bar */}
       <div className="w-full relative">
-        <Icon name="Search" size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400" />
+        <Icon name="Search" size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
         <input
           type="text"
           placeholder="Search assignments..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white dark:bg-[#1A1A1A] border-2 border-slate-300 dark:border-[#1A1A1A] text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+          className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-card border-2 border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
         />
       </div>
 
@@ -30,7 +30,7 @@ const AssignmentFilters = ({
           <select
             value={filterStatus}
             onChange={(e) => onFilterStatusChange(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-[#1A1A1A] border-2 border-slate-300 dark:border-[#1A1A1A] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer transition-all"
+            className="w-full px-4 py-2.5 rounded-lg bg-card border-2 border-border text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer transition-all"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
@@ -40,7 +40,7 @@ const AssignmentFilters = ({
           <Icon 
             name="ChevronDown" 
             size={16} 
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none" 
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none" 
           />
         </div>
 
@@ -48,7 +48,7 @@ const AssignmentFilters = ({
           <select
             value={filterSubject}
             onChange={(e) => onFilterSubjectChange(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-[#1A1A1A] border-2 border-slate-300 dark:[#1A1A1A] text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer transition-all"
+            className="w-full px-4 py-2.5 rounded-lg bg-card border-2 border-border text-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer transition-all"
           >
             <option value="all">All Subjects</option>
             {subjects.map((subject) => (
@@ -60,7 +60,7 @@ const AssignmentFilters = ({
           <Icon 
             name="ChevronDown" 
             size={16} 
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 pointer-events-none" 
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none" 
           />
         </div>
       </div>

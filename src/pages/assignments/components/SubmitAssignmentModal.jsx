@@ -53,16 +53,16 @@ const SubmitAssignmentModal = ({ assignment, isOpen, onClose, onSubmit, isLoadin
 
       {/* Modal */}
       <div className="fixed top-[55%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="bg-white rounded-xl shadow-2xl border-2 border-slate-200 overflow-hidden">
+        <div className="bg-card rounded-xl shadow-card border border-border overflow-hidden">
           {/* Header */}
-          <div className="p-6 border-b border-slate-200 flex items-start justify-between sticky top-0 bg-white">
+          <div className="p-6 border-b border-border flex items-start justify-between sticky top-0 bg-card">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Submit Assignment</h2>
-              <p className="text-sm text-slate-600 mt-1">Upload your work and submit</p>
+              <h2 className="text-xl font-bold text-foreground">Submit Assignment</h2>
+              <p className="text-sm text-muted-foreground mt-1">Upload your work and submit</p>
             </div>
             <button
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 transition-colors"
+              className="text-muted-foreground hover:text-muted-foreground transition-colors"
             >
               <Icon name="X" size={20} />
             </button>
@@ -71,32 +71,32 @@ const SubmitAssignmentModal = ({ assignment, isOpen, onClose, onSubmit, isLoadin
           {/* Content */}
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {/* Assignment Info */}
-            <div className="bg-slate-50 rounded-xl p-4 space-y-2 border border-slate-200">
-              <h3 className="font-bold text-slate-900">{assignment.title}</h3>
+            <div className="bg-muted/20 rounded-xl p-4 space-y-2 border border-border">
+              <h3 className="font-bold text-foreground">{assignment.title}</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-slate-600">Subject</p>
-                  <p className="font-semibold text-slate-900">{assignment.subject}</p>
+                  <p className="text-muted-foreground">Subject</p>
+                  <p className="font-semibold text-foreground">{assignment.subject}</p>
                 </div>
                 <div>
-                  <p className="text-slate-600">Points</p>
-                  <p className="font-semibold text-slate-900">{assignment.points} pts</p>
+                  <p className="text-muted-foreground">Points</p>
+                  <p className="font-semibold text-foreground">{assignment.points} pts</p>
                 </div>
                 <div>
-                  <p className="text-slate-600">Due Date</p>
-                  <p className="font-semibold text-slate-900">{new Date(assignment.dueDate).toLocaleDateString()}</p>
+                  <p className="text-muted-foreground">Due Date</p>
+                  <p className="font-semibold text-foreground">{new Date(assignment.dueDate).toLocaleDateString()}</p>
                 </div>
                 <div>
-                  <p className="text-slate-600">Due Time</p>
-                  <p className="font-semibold text-slate-900">{assignment.dueTime}</p>
+                  <p className="text-muted-foreground">Due Time</p>
+                  <p className="font-semibold text-foreground">{assignment.dueTime}</p>
                 </div>
               </div>
             </div>
 
             {/* Overdue Warning */}
             {isOverdue && (
-              <div className="bg-amber-50 border-2 border-amber-200 rounded-lg p-4">
-                <p className="text-sm text-amber-700">
+              <div className="bg-warning/20 border-2 border-warning rounded-lg p-4">
+                  <p className="text-sm text-warning">
                   <Icon name="AlertCircle" size={16} className="inline mr-2" />
                   This assignment is overdue. Late submission {assignment.lateSubmissionAllowed ? 'is allowed' : 'is NOT allowed'}.
                 </p>
@@ -105,10 +105,10 @@ const SubmitAssignmentModal = ({ assignment, isOpen, onClose, onSubmit, isLoadin
 
             {/* File Upload */}
             <div>
-              <label className="block text-sm font-bold text-slate-900 mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Upload Files
               </label>
-              <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all cursor-pointer group">
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary hover:bg-muted/20 transition-all cursor-pointer group">
                 <input
                   type="file"
                   multiple
@@ -117,26 +117,26 @@ const SubmitAssignmentModal = ({ assignment, isOpen, onClose, onSubmit, isLoadin
                   id="file-input"
                 />
                 <label htmlFor="file-input" className="cursor-pointer">
-                  <Icon name="Upload" size={32} className="mx-auto text-slate-400 group-hover:text-blue-500 mb-2" />
-                  <p className="text-sm font-semibold text-slate-900">Click to upload or drag and drop</p>
-                  <p className="text-xs text-slate-500">PDF, DOC, DOCX, XLS, etc.</p>
+                  <Icon name="Upload" size={32} className="mx-auto text-muted-foreground group-hover:text-primary mb-2" />
+                  <p className="text-sm font-semibold text-foreground">Click to upload or drag and drop</p>
+                  <p className="text-xs text-muted-foreground">PDF, DOC, DOCX, XLS, etc.</p>
                 </label>
               </div>
 
               {/* Uploaded Files List */}
               {submissionData.fileNames.length > 0 && (
                 <div className="mt-3 space-y-2">
-                  <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Uploaded Files:</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Uploaded Files:</p>
                   {submissionData.fileNames.map((fileName, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <div key={idx} className="flex items-center justify-between bg-muted p-3 rounded-lg border border-border">
                       <div className="flex items-center gap-2">
-                        <Icon name="FileText" size={16} className="text-slate-400" />
-                        <span className="text-sm text-slate-900 truncate">{fileName}</span>
+                        <Icon name="FileText" size={16} className="text-muted-foreground" />
+                        <span className="text-sm text-foreground truncate">{fileName}</span>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleRemoveFile(idx)}
-                        className="text-red-600 hover:text-red-700 transition-colors"
+                        className="text-error hover:text-error transition-colors"
                       >
                         <Icon name="X" size={16} />
                       </button>
@@ -148,7 +148,7 @@ const SubmitAssignmentModal = ({ assignment, isOpen, onClose, onSubmit, isLoadin
 
             {/* Comments */}
             <div>
-              <label className="block text-sm font-bold text-slate-900 mb-2">
+              <label className="block text-sm font-bold text-foreground mb-2">
                 Comments (Optional)
               </label>
               <textarea
@@ -159,13 +159,13 @@ const SubmitAssignmentModal = ({ assignment, isOpen, onClose, onSubmit, isLoadin
                 }))}
                 placeholder="Add any comments or notes about your submission..."
                 rows="4"
-                className="w-full px-4 py-2 rounded-lg bg-white border-2 border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 resize-none transition-all"
+                className="w-full px-4 py-2 rounded-lg bg-card border-2 border-border text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none transition-all"
               />
             </div>
 
             {/* Info Box */}
-            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-700">
+            <div className="bg-primary/10 border border-primary/30 rounded-lg p-4">
+              <p className="text-sm text-primary">
                 <Icon name="Info" size={14} className="inline mr-2" />
                 Your submission will be recorded and sent to your instructor for grading.
               </p>
@@ -173,7 +173,7 @@ const SubmitAssignmentModal = ({ assignment, isOpen, onClose, onSubmit, isLoadin
           </form>
 
           {/* Footer */}
-          <div className="p-6 border-t border-slate-200 flex gap-3 justify-end sticky bottom-0 bg-white">
+          <div className="p-6 border-t border-border flex gap-3 justify-end sticky bottom-0 bg-card">
             <Button
               variant="outline"
               onClick={onClose}

@@ -314,7 +314,7 @@ const QRCodeScanner = () => {
               )}
 
               {/* Security Notice */}
-              <div className="bg-warning bg-opacity-10 border border-warning border-opacity-20 rounded-lg p-4">
+              {/* <div className="bg-warning bg-opacity-10 border border-warning border-opacity-20 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
                   <Icon name="Shield" size={20} className="text-warning mt-0.5" />
                   <div>
@@ -327,7 +327,7 @@ const QRCodeScanner = () => {
                     </p>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

@@ -3,10 +3,10 @@ import Icon from 'components/AppIcon';
 
 const UpcomingDeadlines = ({ deadlines }) => {
   const getPriorityColor = (priority) => {
-    if (priority === 'high') return 'bg-red-50 dark:bg-red-900/30 border-red-300 dark:border-red-600 text-red-700 dark:text-red-300';
-    if (priority === 'medium') return 'bg-amber-50 dark:bg-amber-900/30 border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300';
-    if (priority === 'low') return 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-600 text-emerald-700 dark:text-emerald-300';
-    return 'bg-blue-50 dark:bg-blue-900/30 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300';
+    if (priority === 'high') return 'bg-error/20 border-error text-error';
+    if (priority === 'medium') return 'bg-warning/20 border-warning text-warning';
+    if (priority === 'low') return 'bg-success/20 border-success text-success';
+    return 'bg-primary/20 border-primary text-primary';
   };
 
   const getPriorityIcon = (priority) => {
@@ -17,18 +17,18 @@ const UpcomingDeadlines = ({ deadlines }) => {
   };
 
   const getPriorityBadgeColor = (priority) => {
-    if (priority === 'high') return 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-600';
-    if (priority === 'medium') return 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-600';
-    if (priority === 'low') return 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-600';
-    return 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-600';
+    if (priority === 'high') return 'bg-error/20 text-error border border-error';
+    if (priority === 'medium') return 'bg-warning/20 text-warning border border-warning';
+    if (priority === 'low') return 'bg-success/20 text-success border border-success';
+    return 'bg-primary/20 text-primary border border-primary';
   };
 
   return (
-    <div className="bg-white dark:bg-[#1A1A1A] rounded-xl p-6 border-2 border-slate-300 dark:border-[#1B1B1B] hover:shadow-2xl dark:hover:shadow-2xl hover:shadow-slate-300/50 dark:hover:shadow-slate-900/50 transition-all">
+    <div className="bg-card rounded-xl p-6 border border-border hover:shadow-card hover:shadow-card-hover transition-all">
       {/* Header */}
       <div className="mb-6">
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white">Upcoming Deadlines</h3>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+        <h3 className="text-lg font-bold text-foreground">Upcoming Deadlines</h3>
+        <p className="text-sm text-muted-foreground mt-1">
           Important dates to remember
         </p>
       </div>
@@ -38,7 +38,7 @@ const UpcomingDeadlines = ({ deadlines }) => {
         {deadlines.map((deadline, idx) => (
           <div
             key={idx}
-            className={`flex items-start gap-4 p-4 rounded-lg border-2 transition-all hover:shadow-md dark:hover:shadow-lg ${getPriorityColor(
+            className={`flex items-start gap-4 p-4 rounded-lg border-2 transition-all hover:shadow-md ${getPriorityColor(
               deadline.priority
             )}`}
           >
@@ -50,10 +50,10 @@ const UpcomingDeadlines = ({ deadlines }) => {
             {/* Content */}
             <div className="flex-1">
               <div>
-                <h4 className="font-bold text-slate-900 dark:text-white">
+                <h4 className="font-bold text-foreground">
                   {deadline.title}
                 </h4>
-                <p className="text-sm opacity-80 mt-1 text-slate-700 dark:text-slate-300">
+                <p className="text-sm opacity-80 mt-1 text-muted-foreground">
                   {deadline.subject}
                 </p>
               </div>
@@ -77,8 +77,8 @@ const UpcomingDeadlines = ({ deadlines }) => {
       {/* Empty state */}
       {deadlines.length === 0 && (
         <div className="text-center py-8">
-          <Icon name="CheckCircle" size={32} className="mx-auto text-emerald-600 dark:text-emerald-400 mb-2 opacity-50" />
-          <p className="text-slate-600 dark:text-slate-400">No upcoming deadlines!</p>
+          <Icon name="CheckCircle" size={32} className="mx-auto text-success mb-2 opacity-50" />
+          <p className="text-muted-foreground">No upcoming deadlines!</p>
         </div>
       )}
     </div>

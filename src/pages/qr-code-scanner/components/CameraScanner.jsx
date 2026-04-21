@@ -3,7 +3,7 @@ import jsQR from 'jsqr';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
-const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, onCameraStatusChange, onUseManualEntry }) => {
+
 const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, onCameraStatusChange, onScanAttemptsUpdate }) => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);

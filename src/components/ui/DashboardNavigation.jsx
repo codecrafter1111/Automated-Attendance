@@ -88,7 +88,7 @@ const DashboardNavigation = ({ user = null, attendanceStats = null }) => {
   return (
     <div className="space-y-6">
       {/* Welcome Section */}
-      <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/5 rounded-xl p-6 shadow-card border-2 border-primary/20 hover:border-primary/40 transition-all duration-300">
+      <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/5 rounded-xl p-6 shadow-card border-1 border-primary/20 hover:border-primary/40 transition-all duration-300">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold text-foreground">
@@ -116,7 +116,7 @@ const DashboardNavigation = ({ user = null, attendanceStats = null }) => {
         {navigationCards?.map((card, index) => (
           <div
             key={card?.path}
-            className={`bg-gradient-to-br ${card?.urgent ? 'from-primary/10 to-primary/5' : 'from-card to-card/50'} rounded-xl p-6 shadow-card border-2 ${card?.urgent ? 'border-primary/20 hover:border-primary/40' : 'border-border hover:border-primary/50'} hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 cursor-pointer group`}
+            className={`bg-gradient-to-br ${card?.urgent ? 'from-primary/10 to-primary/5' : 'from-card to-card/50'} rounded-xl p-6 shadow-card border dark:border-slate-700/50 ${card?.urgent ? 'border-primary/20 hover:border-primary/40' : 'border-border hover:border-primary/50'} hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 cursor-pointer group`}
             onClick={() => handleNavigation(card?.path)}
           >
             <div className="flex items-start justify-between">
@@ -126,7 +126,7 @@ const DashboardNavigation = ({ user = null, attendanceStats = null }) => {
                     <Icon name={card?.icon} size={28} color={card?.iconColor} />
                   </div>
                   {card?.urgent && (
-                    <span className="px-3 py-1 bg-gradient-to-r from-accent to-accent/80 text-accent-foreground text-xs font-bold rounded-full shadow-md">
+                    <span className="px-3 py-1 bg-slate-800 text-accent-foreground text-xs font-bold rounded-full shadow-md">
                       ⚡ Quick Action
                     </span>
                   )}
@@ -159,7 +159,7 @@ const DashboardNavigation = ({ user = null, attendanceStats = null }) => {
       </div>
       
       {/* Quick Stats */}
-      <div className="bg-gradient-to-br from-card to-card/50 rounded-xl p-6 shadow-card border-2 border-border hover:shadow-card-hover transition-all duration-300">
+      <div className="bg-gradient-to-br from-card to-card/50 rounded-xl p-6 shadow-card border-1 border-border hover:shadow-card-hover transition-all duration-300">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-foreground flex items-center space-x-2">
             <Icon name="BarChart3" size={24} className="text-primary" />
