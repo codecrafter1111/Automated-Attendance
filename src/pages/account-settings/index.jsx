@@ -5,7 +5,7 @@ import Button from '../../components/ui/Button';
 import HeaderNavigation from '../../components/ui/HeaderNavigation';
 import BreadcrumbNavigation from '../../components/ui/BreadcrumbNavigation';
 import Input from '../../components/ui/Input';
-import { isBiometricAvailable, isStudentEnrolled, enrollBiometric, removeBiometricEnrollment } from '../../utils/biometricService';
+import { isBiometricAvailable, isStudentEnrolled, removeBiometricEnrollment } from '../../utils/biometricService';
 import BiometricEnrollmentModal from './components/BiometricEnrollmentModal';
 import ChangePasswordModal from './components/ChangePasswordModal';
 
@@ -62,7 +62,7 @@ const AccountSettings = () => {
   const checkBiometric = async (userId) => {
     try {
       const available = await isBiometricAvailable();
-      setBioAvailable(available);
+      setBioAvailable(Boolean(available?.isAvailable));
       
       const enrolled = isStudentEnrolled(userId);
       setBioEnrolled(enrolled);

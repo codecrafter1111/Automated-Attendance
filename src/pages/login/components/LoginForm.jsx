@@ -5,7 +5,7 @@ import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 import { Checkbox } from '../../../components/ui/Checkbox';
-import { verifyBiometric, isStudentEnrolled, isBiometricAvailable } from '../../../utils/biometricService';
+import { verifyBiometric, isBiometricAvailable, getEnrolledStudents } from '../../../utils/biometricService';
 import studentData from '../../../Data/student';
 import facultyData from '../../../Data/faculty';
 
@@ -18,6 +18,36 @@ const buildStableUserId = (role, email) => {
   const prefix = role === 'faculty' ? 'FA' : 'ST';
   const normalizedEmail = String(email || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
   return `${prefix}_${normalizedEmail}`;
+};
+
+const resolveUserFromBiometricId = (biometricId) => {
+  const matchedStudent = studentData.find(
+    (student) => buildStableUserId('student', student.email) === biometricId
+  );
+
+  if (matchedStudent) {
+    return {
+      name: matchedStudent.username,
+      email: matchedStudent.email,
+      role: 'student',
+      id: biometricId,
+    };
+  }
+
+  const matchedFaculty = facultyData.find(
+    (faculty) => buildStableUserId('faculty', faculty.email) === biometricId
+  );
+
+  if (matchedFaculty) {
+    return {
+      name: matchedFaculty.username,
+      email: matchedFaculty.email,
+      role: 'faculty',
+      id: biometricId,
+    };
+  }
+
+  return null;
 };
 
 const LoginForm = () => {
@@ -104,48 +134,53 @@ const LoginForm = () => {
     try {
       // Check if biometric is available
       const biometricInfo = await isBiometricAvailable();
-      if (!biometricInfo.isAvailable && !biometricInfo.webauthnSupported) {
-        setError('Biometric authentication is not available on this device. Please use your email and password instead.');
+      if (!biometricInfo.isAvailable) {
+        setError('Biometric authentication is not available on this device/browser. Please use email and password login.');
         setLoading(false);
         return;
       }
 
-      if (!formData?.email || !formData?.role) {
-        setError('Please enter your email and select role before biometric authentication.');
+      const enrolledAccounts = getEnrolledStudents()
+        .map((item) => resolveUserFromBiometricId(item.studentId))
+        .filter(Boolean);
+
+      if (enrolledAccounts.length === 0) {
+        setError('No enrolled biometric account found. Login with email/password once, then enroll fingerprint in Account Settings.');
         setLoading(false);
         return;
       }
 
-      const userCollection = formData.role === 'student' ? studentData : facultyData;
-      const matchedUser = userCollection.find((item) => item.email === formData.email);
+      let candidateAccounts = enrolledAccounts;
 
-      if (!matchedUser) {
-        setError(`No ${formData.role} account found with this email. Please check role/email or use password login.`);
+      if (formData?.role) {
+        candidateAccounts = candidateAccounts.filter((account) => account.role === formData.role);
+      }
+
+      if (formData?.email) {
+        candidateAccounts = candidateAccounts.filter(
+          (account) => account.email.toLowerCase() === formData.email.toLowerCase()
+        );
+      }
+
+      if (candidateAccounts.length === 0) {
+        setError('No biometric enrollment matches the selected role/email. Try removing filters or login with password.');
         setLoading(false);
         return;
       }
 
-      const biometricUserId = buildStableUserId(formData.role, formData.email);
-
-      // isStudentEnrolled checks enrollment by biometric ID key; it works for both roles.
-      if (!isStudentEnrolled(biometricUserId)) {
-        setError('No biometric enrollment found for this account. Please login with email/password first and enroll biometric in Account Settings.');
+      if (candidateAccounts.length > 1) {
+        setError('Multiple biometric accounts found. Select role or enter email to continue biometric login.');
         setLoading(false);
         return;
       }
+
+      const selectedAccount = candidateAccounts[0];
 
       // Verify biometric
-      const result = await verifyBiometric(biometricUserId);
+      const result = await verifyBiometric(selectedAccount.id);
       
       if (result.verified) {
-        const userData = {
-          name: matchedUser.username,
-          email: formData.email,
-          role: formData.role,
-          id: biometricUserId,
-        };
-
-        handlePostLogin(userData);
+        handlePostLogin(selectedAccount);
       }
     } catch (err) {
       setError(err.message || 'Biometric authentication failed. Please try again or use email/password login.');

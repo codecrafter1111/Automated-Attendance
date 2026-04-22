@@ -1,11 +1,13 @@
 /**
  * Biometric Service using Web Authentication API (WebAuthn)
  * Handles fingerprint enrollment and verification
- * Includes fallback Mock mode for development/testing
+ * Mock mode is opt-in via VITE_ENABLE_BIOMETRIC_MOCK=true
  */
 
 const BIOMETRIC_DB_KEY = 'attendease_biometric_db';
-const USE_MOCK_MODE = process.env.NODE_ENV === 'development' || !window.PublicKeyCredential;
+const IS_BROWSER = typeof window !== 'undefined';
+const WEBAUTHN_SUPPORTED = IS_BROWSER && !!window.PublicKeyCredential;
+const USE_MOCK_MODE = Boolean(import.meta?.env?.VITE_ENABLE_BIOMETRIC_MOCK === 'true');
 
 // Initialize biometric database in localStorage
 const initBiometricDB = () => {
@@ -48,14 +50,14 @@ const generateMockBiometricSignature = () => {
  * @returns {Promise<Object>} Enrollment result
  */
 export const enrollBiometric = async (studentId, studentName) => {
-  // Use mock mode if WebAuthn is not available
-  if (USE_MOCK_MODE || !window.PublicKeyCredential) {
+  // Mock mode is explicit and should never auto-enable in development.
+  if (USE_MOCK_MODE) {
     // Simulate delay like real biometric scanning
     await new Promise(resolve => setTimeout(resolve, 1500));
     return enrollBiometricMock(studentId, studentName);
   }
   try {
-    if (!window.PublicKeyCredential) {
+    if (!WEBAUTHN_SUPPORTED) {
       throw new Error('Web Authentication API is not supported on this device');
     }
 
@@ -81,11 +83,11 @@ export const enrollBiometric = async (studentId, studentName) => {
       ],
       authenticatorSelection: {
         authenticatorAttachment: 'platform',
-        userVerification: 'preferred',
-        residentKey: 'preferred',
+        userVerification: 'required',
+        residentKey: 'required',
       },
       timeout: 60000,
-      attestation: 'direct',
+      attestation: 'none',
     };
 
     try {
@@ -100,7 +102,7 @@ export const enrollBiometric = async (studentId, studentName) => {
       // Store enrollment in database
       const db = JSON.parse(localStorage.getItem(BIOMETRIC_DB_KEY));
       db[studentId] = {
-        credentialId: bufferToBase64(credential.id),
+        credentialId: bufferToBase64(credential.rawId),
         publicKey: bufferToBase64(credential.response.getPublicKey?.() || new ArrayBuffer(0)),
         counter: credential.response.getTransports ? 0 : null,
         enrolledAt: new Date().toISOString(),
@@ -175,14 +177,14 @@ const enrollBiometricMock = (studentId, studentName) => {
  * @returns {Promise<Object>} Verification result
  */
 export const verifyBiometric = async (studentId) => {
-  // Use mock mode if WebAuthn is not available
-  if (USE_MOCK_MODE || !window.PublicKeyCredential) {
+  // Mock mode is explicit and should never auto-enable in development.
+  if (USE_MOCK_MODE) {
     // Simulate delay like real biometric scanning
     await new Promise(resolve => setTimeout(resolve, 1500));
     return verifyBiometricMock(studentId);
   }
   try {
-    if (!window.PublicKeyCredential) {
+    if (!WEBAUTHN_SUPPORTED) {
       throw new Error('Web Authentication API is not supported on this device');
     }
 
@@ -194,6 +196,10 @@ export const verifyBiometric = async (studentId) => {
     }
 
     const enrollment = db[studentId];
+    if (enrollment.type === 'mock') {
+      throw new Error('This account uses old mock biometric enrollment. Please re-enroll from Account Settings with a real fingerprint.');
+    }
+
     const challenge = crypto.getRandomValues(new Uint8Array(32));
 
     const publicKeyCredentialRequestOptions = {
@@ -284,16 +290,16 @@ const verifyBiometricMock = (studentId) => {
 export const isBiometricAvailable = async () => {
   try {
     const diagnostics = {
-      webauthnSupported: !!window.PublicKeyCredential,
+      webauthnSupported: WEBAUTHN_SUPPORTED,
       credentialsAPISupported: !!navigator?.credentials,
       isAvailable: false,
-      canMock: true,
+      canMock: USE_MOCK_MODE,
       mockModeEnabled: USE_MOCK_MODE,
       os: detectOS(),
     };
 
-    if (!window.PublicKeyCredential) {
-      console.log('[BIOMETRIC] WebAuthn not supported - using mock mode');
+    if (!WEBAUTHN_SUPPORTED) {
+      console.log('[BIOMETRIC] WebAuthn not supported');
       diagnostics.reason = 'WebAuthn API not available';
       return diagnostics;
     }
@@ -303,15 +309,15 @@ export const isBiometricAvailable = async () => {
       diagnostics.isAvailable = available;
       
       if (!available) {
-        console.log('[BIOMETRIC] Platform authenticator not available - using mock mode');
+        console.log('[BIOMETRIC] Platform authenticator not available');
         diagnostics.reason = 'No platform authenticator available';
       }
       
       return diagnostics;
     } catch (innerError) {
-      console.log('[BIOMETRIC] Could not check platform authenticator - using mock mode:', innerError.message);
+      console.log('[BIOMETRIC] Could not check platform authenticator:', innerError.message);
       diagnostics.reason = 'Platform check failed: ' + innerError.message;
-      diagnostics.isAvailable = true;
+      diagnostics.isAvailable = false;
       return diagnostics;
     }
   } catch (error) {
@@ -422,6 +428,7 @@ export default {
   isStudentEnrolled,
   removeBiometricEnrollment,
   getBiometricDeviceInfo,
+  USE_MOCK_MODE,
   testBiometricSetup: async () => {
     console.log('=== BIOMETRIC SETUP DIAGNOSTIC ===');
     const info = getBiometricDeviceInfo();

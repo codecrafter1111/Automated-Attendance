@@ -1,17 +1,52 @@
 import React from 'react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 const PerformanceTrends = ({ data }) => {
-  // Find min and max for scaling
-  const values = data.map(d => d.value);
-  const maxValue = Math.max(...values);
-  const minValue = Math.min(...values);
-  const range = maxValue - minValue || 100;
+  const safeData = Array.isArray(data)
+    ? data
+        .filter((item) => item && item.month)
+        .map((item) => ({
+          month: item.month,
+          value: Number(item.value) || 0,
+        }))
+    : [];
 
-  // Calculate bar heights
-  const bars = data.map(d => ({
-    ...d,
-    height: ((d.value - minValue) / range) * 100 || 50
-  }));
+  if (safeData.length === 0) {
+    return (
+      <div className="bg-card rounded-xl p-6 border border-border hover:shadow-card hover:shadow-card-hover transition-all">
+        <div className="mb-6">
+          <h3 className="text-lg font-bold text-foreground">Performance Trends</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            Monthly performance across different metrics
+          </p>
+        </div>
+        <div className="h-64 rounded-lg border border-dashed border-border bg-muted/20 flex items-center justify-center text-sm text-muted-foreground">
+          No trend data available
+        </div>
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(...safeData.map((d) => d.value), 100);
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (!active || !payload || !payload.length) return null;
+
+    return (
+      <div className="bg-card border border-border rounded-md px-3 py-2 shadow-card">
+        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-sm font-semibold text-foreground">{payload[0].value}%</p>
+      </div>
+    );
+  };
 
   return (
     <div className="bg-card rounded-xl p-6 border border-border hover:shadow-card hover:shadow-card-hover transition-all">
@@ -24,50 +59,26 @@ const PerformanceTrends = ({ data }) => {
       </div>
 
       {/* Chart */}
-      <div className="flex items-end justify-between h-64 gap-2 px-2 relative bg-muted/20 rounded-lg">
-        {/* Grid lines */}
-        <div className="absolute inset-0 flex flex-col justify-between pointer-events-none rounded-lg">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="border-b border-border" />
-          ))}
-        </div>
-
-        {/* Y-axis labels */}
-        <div className="flex flex-col justify-between text-xs text-muted-foreground pr-2 relative z-10">
-          <span>100</span>
-          <span>75</span>
-          <span>50</span>
-          <span>25</span>
-          <span>0</span>
-        </div>
-
-        {/* Bars */}
-        <div className="flex-1 flex items-end justify-between gap-1 relative z-10">
-          {bars.map((bar, idx) => (
-            <div
-              key={idx}
-              className="flex-1 flex flex-col items-center group relative"
-            >
-              {/* Bar */}
-              <div
-                className="w-full bg-primary rounded-t-lg transition-all hover:bg-primary/80 cursor-pointer shadow-card"
-                style={{ height: `${bar.height}%` }}
-                title={`${bar.month}: ${bar.value}%`}
-              />
-              {/* Tooltip */}
-              <div className="opacity-0 group-hover:opacity-100 absolute bg-foreground text-background text-xs px-2 py-1 rounded mt-2 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                {bar.value}%
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* X-axis labels */}
-      <div className="flex justify-between text-xs text-muted-foreground mt-4 pl-14">
-        {data.map((d, idx) => (
-          <div key={idx} className="flex-1 text-center">{d.month}</div>
-        ))}
+      <div className="h-64 bg-muted/20 rounded-lg border border-border/50 p-3">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={safeData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis
+              dataKey="month"
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+              axisLine={{ stroke: 'hsl(var(--border))' }}
+              tickLine={{ stroke: 'hsl(var(--border))' }}
+            />
+            <YAxis
+              domain={[0, Math.ceil(maxValue / 10) * 10]}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+              axisLine={{ stroke: 'hsl(var(--border))' }}
+              tickLine={{ stroke: 'hsl(var(--border))' }}
+            />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: 'hsl(var(--muted) / 0.35)' }} />
+            <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} maxBarSize={36} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Grid lines */}
