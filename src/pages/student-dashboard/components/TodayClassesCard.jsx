@@ -6,22 +6,38 @@ import Button from '../../../components/ui/Button';
 const TodayClassesCard = ({ todayClasses }) => {
   const navigate = useNavigate();
 
-  const getTimeStatus = (startTime) => {
+  const getTimeStatus = (startTime, endTime) => {
     const now = new Date();
-    const classTime = new Date();
-    const [hours, minutes] = startTime?.split(':');
-    classTime?.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-    
-    const diffMinutes = (classTime - now) / (1000 * 60);
-    
-    if (diffMinutes > 30) return { status: 'upcoming', color: 'text-muted-foreground' };
-    if (diffMinutes > 0) return { status: 'starting-soon', color: 'text-warning' };
-    if (diffMinutes > -60) return { status: 'ongoing', color: 'text-success' };
+    const classStart = new Date();
+    const classEnd = new Date();
+
+    const [startHours, startMinutes] = String(startTime || '00:00').split(':');
+    const [endHours, endMinutes] = String(endTime || '23:59').split(':');
+
+    classStart.setHours(parseInt(startHours, 10) || 0, parseInt(startMinutes, 10) || 0, 0, 0);
+    classEnd.setHours(parseInt(endHours, 10) || 23, parseInt(endMinutes, 10) || 59, 0, 0);
+
+    const minutesToStart = (classStart - now) / (1000 * 60);
+
+    if (now >= classStart && now <= classEnd) return { status: 'ongoing', color: 'text-success' };
+    if (minutesToStart > 30) return { status: 'upcoming', color: 'text-muted-foreground' };
+    if (minutesToStart > 0) return { status: 'starting-soon', color: 'text-warning' };
     return { status: 'completed', color: 'text-muted-foreground' };
   };
 
-  const handleQRScan = () => {
-    navigate('/qr-code-scanner');
+  const handleQRScan = (classItem) => {
+    const params = new URLSearchParams({
+      expectedClassId: String(classItem?.classId || classItem?.id || ''),
+      expectedSubject: String(classItem?.subject || ''),
+      expectedFaculty: String(classItem?.faculty || ''),
+      expectedLocation: String(classItem?.location || ''),
+      expectedStartTime: String(classItem?.startTime || ''),
+      expectedEndTime: String(classItem?.endTime || ''),
+      expectedCode: String(classItem?.code || ''),
+      expectedSection: String(classItem?.section || ''),
+    });
+
+    navigate(`/qr-code-scanner?${params.toString()}`);
   };
 
   return (
@@ -47,7 +63,8 @@ const TodayClassesCard = ({ todayClasses }) => {
       ) : (
         <div className="space-y-4">
           {todayClasses?.map((classItem) => {
-            const timeStatus = getTimeStatus(classItem?.startTime);
+            const timeStatus = getTimeStatus(classItem?.startTime, classItem?.endTime);
+            const isInAttendanceWindow = timeStatus?.status === 'ongoing';
             
             return (
               <div key={classItem?.id} className="border border-border rounded-lg p-4 hover:shadow-card transition-smooth">
@@ -91,10 +108,10 @@ const TodayClassesCard = ({ todayClasses }) => {
                         <Button
                           variant="default"
                           size="sm"
-                          onClick={handleQRScan}
+                          onClick={() => handleQRScan(classItem)}
                           iconName="QrCode"
                           iconPosition="left"
-                          disabled={timeStatus?.status === 'completed'}
+                          disabled={!isInAttendanceWindow}
                         >
                           Scan QR
                         </Button>
@@ -103,11 +120,17 @@ const TodayClassesCard = ({ todayClasses }) => {
                           size="sm"
                           iconName="Fingerprint"
                           iconPosition="left"
-                          disabled={timeStatus?.status === 'completed'}
+                          disabled={!isInAttendanceWindow}
                         >
                           Biometric
                         </Button>
                       </div>
+                    )}
+
+                    {!classItem?.attendanceMarked && !isInAttendanceWindow && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Attendance can be marked only during class time ({classItem?.startTime} - {classItem?.endTime}).
+                      </p>
                     )}
                   </div>
                 </div>

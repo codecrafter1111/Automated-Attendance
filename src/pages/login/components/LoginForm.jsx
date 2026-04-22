@@ -9,6 +9,17 @@ import { verifyBiometric, isStudentEnrolled, isBiometricAvailable } from '../../
 import studentData from '../../../Data/student';
 import facultyData from '../../../Data/faculty';
 
+const dashboardRoutes = {
+  student: '/student-dashboard',
+  faculty: '/faculty-dashboard',
+};
+
+const buildStableUserId = (role, email) => {
+  const prefix = role === 'faculty' ? 'FA' : 'ST';
+  const normalizedEmail = String(email || '').toLowerCase().replace(/[^a-z0-9]/g, '_');
+  return `${prefix}_${normalizedEmail}`;
+};
+
 const LoginForm = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -36,6 +47,19 @@ const LoginForm = () => {
     return null;
   };
 
+  const handlePostLogin = (userData) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+
+    const redirectTo = searchParams.get('redirect');
+    if (redirectTo) {
+      const decodedRedirect = decodeURIComponent(redirectTo);
+      navigate(decodedRedirect);
+      return;
+    }
+
+    navigate(dashboardRoutes[userData.role] || '/student-dashboard');
+  };
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (error) setError('');
@@ -58,31 +82,14 @@ const LoginForm = () => {
       const user = validateCredentials(formData?.email, formData?.password, formData?.role);
       
       if (user) {
-        // Store user data
         const userData = {
           name: user.username,
           email: formData?.email,
           role: formData?.role,
-          id: `${formData?.role.substring(0, 2).toUpperCase()}${Math.random().toString(36).substring(2, 9)}`
+          id: buildStableUserId(formData?.role, formData?.email),
         };
-        
-        localStorage.setItem('user', JSON.stringify(userData));
-        
-        // Check if there's a redirect parameter (from QR code scan)
-        const redirectTo = searchParams.get('redirect');
-        if (redirectTo) {
-          // Decode the redirect URL properly
-          const decodedRedirect = decodeURIComponent(redirectTo);
-          console.log('Redirecting to:', decodedRedirect);
-          navigate(decodedRedirect);
-        } else {
-          // Navigate based on role
-          const dashboardRoutes = {
-            student: '/student-dashboard',
-            faculty: '/faculty-dashboard'
-          };
-          navigate(dashboardRoutes?.[formData?.role]);
-        }
+
+        handlePostLogin(userData);
       } else {
         setError(`Invalid credentials. No ${formData?.role} account found with this email and password.`);
       }
@@ -103,38 +110,42 @@ const LoginForm = () => {
         return;
       }
 
-      // For demo purposes, we'll use a preset student ID
-      // In production, you'd need a way to identify the user before biometric verification
-      const demoStudentId = 'ST2024001';
-      
-      // Check if student has biometric enrollment
-      if (!isStudentEnrolled(demoStudentId)) {
-        setError(`No biometric enrollment found for this user. Please use email/password to login first, then enroll your biometric.`);
+      if (!formData?.email || !formData?.role) {
+        setError('Please enter your email and select role before biometric authentication.');
+        setLoading(false);
+        return;
+      }
+
+      const userCollection = formData.role === 'student' ? studentData : facultyData;
+      const matchedUser = userCollection.find((item) => item.email === formData.email);
+
+      if (!matchedUser) {
+        setError(`No ${formData.role} account found with this email. Please check role/email or use password login.`);
+        setLoading(false);
+        return;
+      }
+
+      const biometricUserId = buildStableUserId(formData.role, formData.email);
+
+      // isStudentEnrolled checks enrollment by biometric ID key; it works for both roles.
+      if (!isStudentEnrolled(biometricUserId)) {
+        setError('No biometric enrollment found for this account. Please login with email/password first and enroll biometric in Account Settings.');
         setLoading(false);
         return;
       }
 
       // Verify biometric
-      const result = await verifyBiometric(demoStudentId);
+      const result = await verifyBiometric(biometricUserId);
       
       if (result.verified) {
-        // Store user data
         const userData = {
-          name: 'Rahul Sharma',
-          email: 'student@college.edu',
-          role: 'student',
-          id: demoStudentId
+          name: matchedUser.username,
+          email: formData.email,
+          role: formData.role,
+          id: biometricUserId,
         };
-        
-        localStorage.setItem('user', JSON.stringify(userData));
-        
-        // Check if there's a redirect parameter (from QR code scan)
-        const redirectTo = searchParams.get('redirect');
-        if (redirectTo) {
-          navigate(redirectTo);
-        } else {
-          navigate('/student-dashboard');
-        }
+
+        handlePostLogin(userData);
       }
     } catch (err) {
       setError(err.message || 'Biometric authentication failed. Please try again or use email/password login.');

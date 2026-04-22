@@ -20,52 +20,109 @@ const FacultyDashboard = () => {
   const [liveSession, setLiveSession] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
 
+  const getClassStatusByTime = (timeRange) => {
+    const now = new Date();
+    const [startRaw = '', endRaw = ''] = String(timeRange || '').split('-').map((value) => value.trim());
+
+    const parseTime = (value) => {
+      const match = String(value).match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+      if (!match) return null;
+
+      const hours12 = parseInt(match[1], 10);
+      const minutes = parseInt(match[2], 10);
+      const meridiem = match[3].toUpperCase();
+      const hours24 = (hours12 % 12) + (meridiem === 'PM' ? 12 : 0);
+
+      const parsed = new Date();
+      parsed.setHours(hours24, minutes, 0, 0);
+      return parsed;
+    };
+
+    const start = parseTime(startRaw);
+    const end = parseTime(endRaw);
+    if (!start || !end) return 'upcoming';
+
+    if (now < start) return 'upcoming';
+    if (now > end) return 'completed';
+    return 'ongoing';
+  };
+
   // Mock data for faculty dashboard
   const todayClasses = [
     {
       id: 1,
-      name: "Data Structures and Algorithms",
-      subjectCode: "CS301",
-      time: "09:00 AM - 10:30 AM",
-      room: "Room 101, CS Block",
+      name: "Data Structures & Algorithms",
+      subjectCode: "CS2021-DSA-A",
+      time: "09:00 AM - 10:00 AM",
+      room: "Room 301, CS Block",
       enrolledStudents: 45,
       attendanceRate: 87,
-      status: "upcoming"
+      status: getClassStatusByTime("09:00 AM - 10:00 AM")
     },
     {
       id: 2,
       name: "Database Management Systems",
-      subjectCode: "CS302",
-      time: "11:00 AM - 12:30 PM",
-      room: "Room 205, CS Block",
+      subjectCode: "CS2021-DBMS-B",
+      time: "10:00 AM - 11:00 AM",
+      room: "Lab 205, IT Block",
       enrolledStudents: 38,
       attendanceRate: 92,
-      status: "ongoing"
+      status: getClassStatusByTime("10:00 AM - 11:00 AM")
     },
     {
       id: 3,
       name: "Software Engineering",
-      subjectCode: "CS303",
-      time: "02:00 PM - 03:30 PM",
-      room: "Room 301, CS Block",
+      subjectCode: "CS2021-SE-C",
+      time: "11:00 AM - 12:00 PM",
+      room: "Room 102, Main Block",
       enrolledStudents: 42,
       attendanceRate: 78,
-      status: "upcoming"
+      status: getClassStatusByTime("11:00 AM - 12:00 PM")
     },
     {
       id: 4,
       name: "Computer Networks",
-      subjectCode: "CS304",
-      time: "04:00 PM - 05:30 PM",
-      room: "Room 102, CS Block",
+      subjectCode: "CS2021-CN-D",
+      time: "12:00 PM - 01:00 PM",
+      room: "Lab 301, IT Block",
       enrolledStudents: 35,
       attendanceRate: 85,
-      status: "completed"
+      status: getClassStatusByTime("12:00 PM - 01:00 PM")
+    },
+    {
+      id: 5,
+      name: "Object Oriented Programming",
+      subjectCode: "CS2021-OOP-E",
+      time: "01:00 PM - 02:00 PM",
+      room: "Room 210, CS Block",
+      enrolledStudents: 40,
+      attendanceRate: 84,
+      status: getClassStatusByTime("01:00 PM - 02:00 PM")
+    },
+    {
+      id: 6,
+      name: "Artificial Intelligence",
+      subjectCode: "CS2021-AI-F",
+      time: "02:00 PM - 03:00 PM",
+      room: "Room 405, AI Block",
+      enrolledStudents: 36,
+      attendanceRate: 88,
+      status: getClassStatusByTime("02:00 PM - 03:00 PM")
+    },
+    {
+      id: 7,
+      name: "Web Development",
+      subjectCode: "CS2021-WD-G",
+      time: "03:00 PM - 04:00 PM",
+      room: "Lab 112, Tech Block",
+      enrolledStudents: 44,
+      attendanceRate: 90,
+      status: getClassStatusByTime("03:00 PM - 04:00 PM")
     }
   ];
 
   const summaryMetrics = {
-    classesToday: 4,
+    classesToday: 7,
     classesTodayChange: 1,
     averageAttendance: 86,
     attendanceChange: 3,

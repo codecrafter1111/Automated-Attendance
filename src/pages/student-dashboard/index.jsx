@@ -28,29 +28,86 @@ const StudentDashboard = () => {
   const todayClasses = [
     {
       id: 1,
+      classId: "CS2021-DSA-A",
+      code: "CS2021",
+      section: "A",
       subject: "Data Structures & Algorithms",
       faculty: "Dr. Priya Sharma",
       startTime: "09:00",
-      endTime: "10:30",
+      endTime: "10:00",
       location: "Room 301, CS Block",
       attendanceMarked: false
     },
     {
       id: 2,
+      classId: "CS2021-DBMS-B",
+      code: "CS2021",
+      section: "B",
       subject: "Database Management Systems",
       faculty: "Prof. Rajesh Kumar",
-      startTime: "11:00",
-      endTime: "12:30",
+      startTime: "10:00",
+      endTime: "11:00",
       location: "Lab 205, IT Block",
       attendanceMarked: true
     },
     {
       id: 3,
+      classId: "CS2021-SE-C",
+      code: "CS2021",
+      section: "C",
       subject: "Software Engineering",
       faculty: "Dr. Anita Verma",
-      startTime: "14:00",
-      endTime: "15:30",
+      startTime: "11:00",
+      endTime: "12:00",
       location: "Room 102, Main Block",
+      attendanceMarked: false
+    },
+    {
+      id: 4,
+      classId: "CS2021-CN-D",
+      code: "CS2021",
+      section: "D",
+      subject: "Computer Networks",
+      faculty: "Prof. Suresh Patel",
+      startTime: "12:00",
+      endTime: "13:00",
+      location: "Lab 301, IT Block",
+      attendanceMarked: false
+    },
+    {
+      id: 5,
+      classId: "CS2021-OOP-E",
+      code: "CS2021",
+      section: "E",
+      subject: "Object Oriented Programming",
+      faculty: "Dr. Kavita Rao",
+      startTime: "13:00",
+      endTime: "14:00",
+      location: "Room 210, CS Block",
+      attendanceMarked: false
+    },
+    {
+      id: 6,
+      classId: "CS2021-AI-F",
+      code: "CS2021",
+      section: "F",
+      subject: "Artificial Intelligence",
+      faculty: "Dr. Neeraj Singh",
+      startTime: "14:00",
+      endTime: "15:00",
+      location: "Room 405, AI Block",
+      attendanceMarked: false
+    },
+    {
+      id: 7,
+      classId: "CS2021-WD-G",
+      code: "CS2021",
+      section: "G",
+      subject: "Web Development",
+      faculty: "Prof. Meera Nair",
+      startTime: "15:00",
+      endTime: "16:00",
+      location: "Lab 112, Tech Block",
       attendanceMarked: false
     }
   ];

@@ -4,6 +4,36 @@ import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import { upsertAttendanceSession } from '../../../utils/attendanceSessionStore';
 
+const to24Hour = (value) => {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  const amPmMatch = raw.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (amPmMatch) {
+    const hours12 = parseInt(amPmMatch[1], 10);
+    const minutes = parseInt(amPmMatch[2], 10);
+    const meridiem = amPmMatch[3].toUpperCase();
+
+    const hours24 = (hours12 % 12) + (meridiem === 'PM' ? 12 : 0);
+    return `${String(hours24).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  }
+
+  const twentyFourHourMatch = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (twentyFourHourMatch) {
+    return `${String(parseInt(twentyFourHourMatch[1], 10)).padStart(2, '0')}:${twentyFourHourMatch[2]}`;
+  }
+
+  return '';
+};
+
+const getClassWindowFromRange = (timeRange) => {
+  const [startRaw = '', endRaw = ''] = String(timeRange || '').split('-').map((part) => part.trim());
+  return {
+    classStartTime: to24Hour(startRaw),
+    classEndTime: to24Hour(endRaw),
+  };
+};
+
 const AttendanceMethodsPanel = ({ 
   qrCodeVisible, 
   onCloseQR, 
@@ -62,6 +92,8 @@ const AttendanceMethodsPanel = ({
     const expiresInSeconds = 10;
     const expiresAt = Date.now() + expiresInSeconds * 1000;
 
+    const classWindow = getClassWindowFromRange(classInfo?.time);
+
     const payload = {
       classId: classInfo?.id || 'CLASS-12345',
       className: classInfo?.subject || 'Unknown Class',
@@ -69,6 +101,8 @@ const AttendanceMethodsPanel = ({
       location: classInfo?.location || 'Room A-101',
       sessionId,
       faculty: classInfo?.faculty || 'Faculty Name',
+      classStartTime: classWindow.classStartTime,
+      classEndTime: classWindow.classEndTime,
       expiresIn: expiresInSeconds,
       expiresAt
     };
@@ -81,6 +115,12 @@ const AttendanceMethodsPanel = ({
     url.searchParams.set('faculty', payload.faculty);
     url.searchParams.set('location', payload.location);
     url.searchParams.set('expiresAt', String(payload.expiresAt));
+    if (payload.classStartTime) {
+      url.searchParams.set('classStartTime', payload.classStartTime);
+    }
+    if (payload.classEndTime) {
+      url.searchParams.set('classEndTime', payload.classEndTime);
+    }
 
     return {
       ...payload,
@@ -97,6 +137,8 @@ const AttendanceMethodsPanel = ({
       className: qrPayload.className,
       faculty: qrPayload.faculty,
       location: qrPayload.location,
+      classStartTime: qrPayload.classStartTime,
+      classEndTime: qrPayload.classEndTime,
       startedAt: Date.now(),
       expiresAt: qrPayload.expiresAt,
       qrURL: qrPayload.url,

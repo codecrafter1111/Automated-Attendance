@@ -12,6 +12,13 @@ import Icon from '../../components/AppIcon';
 import { getAttendanceSubmissions, getLatestActiveSession, mergeRemoteAttendanceSubmissions, upsertAttendanceSession } from '../../utils/attendanceSessionStore';
 import { fetchAttendanceFromMongo } from '../../utils/attendanceApi';
 
+const RECENT_ACTIVITY_WINDOW_KEY = 'attendease_recent_activity_window';
+const RECENT_ACTIVITY_WINDOWS = {
+  '2h': 2 * 60 * 60 * 1000,
+  '4h': 4 * 60 * 60 * 1000,
+  'full-day': 24 * 60 * 60 * 1000,
+};
+
 
 const ClassAttendanceMarking = () => {
   const navigate = useNavigate();
@@ -37,6 +44,11 @@ const ClassAttendanceMarking = () => {
   const [sortBy, setSortBy] = useState('name');
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [allSelected, setAllSelected] = useState(false);
+  const [recentWindowKey, setRecentWindowKey] = useState(() => {
+    if (typeof window === 'undefined') return '4h';
+    const saved = window.localStorage.getItem(RECENT_ACTIVITY_WINDOW_KEY);
+    return RECENT_ACTIVITY_WINDOWS[saved] ? saved : '4h';
+  });
 
   const getStoredFacultyName = () => {
     try {
@@ -172,18 +184,24 @@ const ClassAttendanceMarking = () => {
     const safeSubmissions = getAttendanceSubmissions();
     if (!Array.isArray(safeSubmissions)) return [];
 
-    const activeSession = getLatestActiveSession();
-    const activeSessionId = activeSession?.classId === classInfo.id ? activeSession.sessionId : null;
+    const recentWindowMs = RECENT_ACTIVITY_WINDOWS[recentWindowKey] || RECENT_ACTIVITY_WINDOWS['4h'];
+    const now = Date.now();
 
     return safeSubmissions
       .filter((item) => {
         if (item.classId !== classInfo.id || item.status !== 'present') return false;
-        // Keep activity focused on the currently running lecture session when available.
-        if (activeSessionId) return item.sessionId === activeSessionId;
-        return true;
+
+        // QR session IDs rotate frequently; use recency to avoid dropping valid marks.
+        const itemTimestamp = Number(item.timestamp) || 0;
+        return itemTimestamp > 0 && now - itemTimestamp <= recentWindowMs;
       })
       .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(RECENT_ACTIVITY_WINDOW_KEY, recentWindowKey);
+  }, [recentWindowKey]);
 
   const applyQRSubmissions = () => {
     const submissions = getClassSubmissions();
@@ -606,7 +624,21 @@ const ClassAttendanceMarking = () => {
 
           {/* Recent Activity */}
           <div className="bg-card rounded-lg border border-border p-5 mb-6">
-            <h3 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h3>
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <h3 className="text-lg font-semibold text-foreground">Recent Activity</h3>
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                Window
+                <select
+                  value={recentWindowKey}
+                  onChange={(event) => setRecentWindowKey(event.target.value)}
+                  className="bg-background border border-border rounded-md px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  <option value="2h">Last 2 hours</option>
+                  <option value="4h">Last 4 hours</option>
+                  <option value="full-day">Full day</option>
+                </select>
+              </label>
+            </div>
             <div className="space-y-2 text-sm">
               {recentActivity.length > 0 ? (
                 recentActivity.map((activity) => (

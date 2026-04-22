@@ -29,21 +29,43 @@ const QRCodeScanner = () => {
   const [attendanceResult, setAttendanceResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Mock data
+  const expectedClassId = searchParams.get('expectedClassId') || '';
+  const expectedSubject = searchParams.get('expectedSubject') || '';
+  const expectedFaculty = searchParams.get('expectedFaculty') || '';
+  const expectedLocation = searchParams.get('expectedLocation') || '';
+  const expectedStartTime = searchParams.get('expectedStartTime') || '';
+  const expectedEndTime = searchParams.get('expectedEndTime') || '';
+  const expectedCode = searchParams.get('expectedCode') || '';
+  const expectedSection = searchParams.get('expectedSection') || '';
+
   const currentClass = {
-    id: 'CS101-2024-A',
-    subject: 'Computer Science Fundamentals',
-    code: 'CS101',
-    section: 'A',
-    faculty: 'Dr. Priya Sharma',
-    location: 'Room A-101, Block A',
-    startTime: '09:00',
-    endTime: '10:30'
+    id: expectedClassId || 'CS101-2024-A',
+    subject: expectedSubject || 'Computer Science Fundamentals',
+    code: expectedCode || 'CS101',
+    section: expectedSection || 'A',
+    faculty: expectedFaculty || 'Dr. Priya Sharma',
+    location: expectedLocation || 'Room A-101, Block A',
+    startTime: expectedStartTime || '09:00',
+    endTime: expectedEndTime || '10:30'
   };
 
   const attendanceWindow = {
-    start: '08:45',
-    end: '09:15'
+    start: currentClass.startTime,
+    end: currentClass.endTime,
+  };
+
+  const isWithinAttendanceWindow = () => {
+    const now = new Date();
+    const start = new Date();
+    const end = new Date();
+
+    const [startHours, startMinutes] = String(attendanceWindow.start || '00:00').split(':');
+    const [endHours, endMinutes] = String(attendanceWindow.end || '23:59').split(':');
+
+    start.setHours(parseInt(startHours, 10) || 0, parseInt(startMinutes, 10) || 0, 0, 0);
+    end.setHours(parseInt(endHours, 10) || 23, parseInt(endMinutes, 10) || 59, 0, 0);
+
+    return now >= start && now <= end;
   };
 
   useEffect(() => {
@@ -78,6 +100,11 @@ const QRCodeScanner = () => {
     const sessionId = searchParams.get('sessionId');
     
     if (classId && sessionId) {
+      if (expectedClassId && classId !== expectedClassId) {
+        alert(`This QR belongs to class ${classId}. Please scan QR for selected class ${expectedClassId}.`);
+        return;
+      }
+
       console.log('✓ Auto-processing QR data:', { classId, sessionId });
       const qrData = {
         classId,
@@ -91,6 +118,16 @@ const QRCodeScanner = () => {
 
   const handleScanSuccess = (qrData) => {
     console.log('QR Code Scanned:', qrData);
+
+    if (!isWithinAttendanceWindow()) {
+      alert(`Attendance is allowed only during ${attendanceWindow.start} - ${attendanceWindow.end} for this class.`);
+      return;
+    }
+
+    if (expectedClassId && qrData?.classId && qrData.classId !== expectedClassId) {
+      handleScanError(`Scanned QR is for ${qrData.classId}. Please scan QR for ${expectedClassId}.`);
+      return;
+    }
 
     if (qrData?.redirectPath) {
       navigate(qrData.redirectPath);
@@ -146,6 +183,11 @@ const QRCodeScanner = () => {
   };
 
   const handleConfirmAttendance = async (scanData) => {
+    if (!isWithinAttendanceWindow()) {
+      alert(`Attendance window is closed. Allowed time: ${attendanceWindow.start} - ${attendanceWindow.end}.`);
+      return;
+    }
+
     setIsProcessing(true);
     
     try {
