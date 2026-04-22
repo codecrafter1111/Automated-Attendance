@@ -91,6 +91,12 @@ const QRCodeScanner = () => {
 
   const handleScanSuccess = (qrData) => {
     console.log('QR Code Scanned:', qrData);
+
+    if (qrData?.redirectPath) {
+      navigate(qrData.redirectPath);
+      return;
+    }
+
     setScannedData(qrData);
     setShowConfirmation(true);
     setIsScanning(false);

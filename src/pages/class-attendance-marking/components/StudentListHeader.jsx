@@ -33,7 +33,7 @@ const StudentListHeader = ({
   return (
     <div className="bg-gradient-to-br from-card to-card/50 rounded-xl shadow-card border-2 border-border p-4 mb-4 hover:shadow-card-hover transition-all duration-300">
       {/* Header with selection info */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
         <div className="flex items-center space-x-4 mb-3 sm:mb-0">
           <Checkbox
             checked={allSelected}
@@ -42,7 +42,7 @@ const StudentListHeader = ({
             className="w-5 h-5 cursor-pointer"
           />
           {selectedCount > 0 && (
-            <span className="text-sm font-semibold px-3 py-1 bg-primary/10 border border-primary/20 rounded-full text-primary">
+            <span className="text-sm font-semibold px-3 py-1  bg-primary/10 border border-primary/20 rounded-full text-primary">
               {selectedCount} / {totalCount} selected
             </span>
           )}

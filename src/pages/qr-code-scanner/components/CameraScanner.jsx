@@ -247,18 +247,44 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
       // QR code detected successfully
       console.log('QR Code detected! Raw data:', code?.data);
       try {
+        if (typeof code?.data === 'string' && code.data.includes('/mark-attendance')) {
+          const parsedUrl = new URL(code.data, window.location.origin);
+          const params = parsedUrl.searchParams;
+          const expiresAt = Number(params.get('expiresAt')) || 0;
+
+          if (expiresAt && Date.now() > expiresAt) {
+            onScanError?.('QR code expired. Please ask faculty to generate a new one.');
+            return;
+          }
+
+          const redirectPath = `/mark-attendance?${params.toString()}`;
+          const qrData = {
+            classId: params.get('classId'),
+            sessionId: params.get('sessionId'),
+            timestamp: Date.now(),
+            location: params.get('location') || 'QR-Scanned',
+            redirectPath,
+            rawData: code.data,
+          };
+
+          setDetectedCode(qrData);
+          onScanSuccess?.(qrData);
+          setScanningActive(false);
+          return;
+        }
+
         // Try to parse as JSON first
         let qrData;
         try {
           qrData = JSON.parse(code?.data);
           console.log('Parsed QR data as JSON:', qrData);
           
-          // Check if QR code has expired (older than 30 seconds)
+          // Check if QR code has expired (older than 10 seconds)
           if (qrData?.timestamp) {
             const currentTime = Date.now();
             const qrAge = (currentTime - qrData.timestamp) / 1000; // age in seconds
             
-            if (qrAge > 30) {
+            if (qrAge > 10) {
               console.warn('QR code expired! Age:', qrAge, 'seconds');
               onScanError?.('QR code expired. Please ask faculty to generate a new one.');
               // Continue scanning for a fresh QR code
@@ -283,7 +309,7 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
             const currentTime = Date.now();
             const qrAge = (currentTime - timestamp) / 1000;
             
-            if (qrAge > 30) {
+            if (qrAge > 10) {
               console.warn('QR code expired! Age:', qrAge, 'seconds');
               onScanError?.('QR code expired. Please ask faculty to generate a new one.');
               setTimeout(() => {
@@ -453,14 +479,6 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
     }
   };
 
-  if (cameraStatus !== 'ready') {
-    return (
-      <div className="relative w-full h-80 md:h-96">
-        {renderCameraStatus()}
-      </div>
-    );
-  }
-
   return (
     <div className="relative w-full h-80 md:h-96 bg-black rounded-lg overflow-hidden">
       {/* Video Stream */}
@@ -475,8 +493,17 @@ const CameraScanner = ({ onScanSuccess, onScanError, isScanning, currentClass, o
       {/* Hidden Canvas for Processing */}
       <canvas ref={canvasRef} className="hidden" />
 
+      {/* Status Overlay */}
+      {cameraStatus !== 'ready' && (
+        <div className="absolute inset-0 bg-background/95 backdrop-blur-sm flex items-center justify-center z-20">
+          <div className="w-full h-full">
+            {renderCameraStatus()}
+          </div>
+        </div>
+      )}
+
       {/* Scanning Overlay */}
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center z-10">
         {/* Scanning Frame */}
         <div className="relative w-64 h-64 border-2 border-primary rounded-lg">
           {/* Corner Indicators */}

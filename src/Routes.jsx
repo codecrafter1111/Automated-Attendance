@@ -13,6 +13,7 @@ import AccountSettings from './pages/account-settings';
 import Events from './pages/events';
 import Assignments from './pages/assignments';
 import Performance from './pages/performance';
+import MarkAttendance from './pages/mark-attendance';
 
 const Routes = () => {
   return (
@@ -32,6 +33,7 @@ const Routes = () => {
         <Route path="/events" element={<Events />} />
         <Route path="/assignments" element={<Assignments />} />
         <Route path="/performance" element={<Performance />} />
+        <Route path="/mark-attendance" element={<MarkAttendance />} />
         <Route path="*" element={<NotFound />} />
       </RouterRoutes>
       </ErrorBoundary>

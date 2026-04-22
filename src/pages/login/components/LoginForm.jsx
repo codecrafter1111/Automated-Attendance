@@ -6,6 +6,8 @@ import Input from '../../../components/ui/Input';
 import Select from '../../../components/ui/Select';
 import { Checkbox } from '../../../components/ui/Checkbox';
 import { verifyBiometric, isStudentEnrolled, isBiometricAvailable } from '../../../utils/biometricService';
+import studentData from '../../../Data/student';
+import facultyData from '../../../Data/faculty';
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -20,18 +22,19 @@ const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Mock credentials for different roles
-  const mockCredentials = {
-    student: { email: 'student@college.edu', password: 'student123' },
-    faculty: { email: 'faculty@college.edu', password: 'faculty123' },
-    administrator: { email: 'admin@college.edu', password: 'admin@123' }
-  };
-
   const roleOptions = [
     { value: 'student', label: 'Student' },
-    { value: 'faculty', label: 'Faculty' },
-    { value: 'administrator', label: 'Administrator' }
+    { value: 'faculty', label: 'Faculty' }
   ];
+
+  const validateCredentials = (email, password, role) => {
+    if (role === 'student') {
+      return studentData.find(s => s.email === email && s.password === password);
+    } else if (role === 'faculty') {
+      return facultyData.find(f => f.email === email && f.password === password);
+    }
+    return null;
+  };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -50,19 +53,17 @@ const LoginForm = () => {
       return;
     }
 
-    // Mock authentication
+    // Validate against actual user data
     setTimeout(() => {
-      const mockCred = mockCredentials?.[formData?.role];
+      const user = validateCredentials(formData?.email, formData?.password, formData?.role);
       
-      if (formData?.email === mockCred?.email && formData?.password === mockCred?.password) {
+      if (user) {
         // Store user data
         const userData = {
-          name: formData?.role === 'student' ? 'Rahul Sharma' : 
-                formData?.role === 'faculty' ? 'Dr. Priya Patel' : 'Admin Kumar',
+          name: user.username,
           email: formData?.email,
           role: formData?.role,
-          id: formData?.role === 'student' ? 'ST2024001' : 
-              formData?.role === 'faculty' ? 'FC2024001' : 'AD2024001'
+          id: `${formData?.role.substring(0, 2).toUpperCase()}${Math.random().toString(36).substring(2, 9)}`
         };
         
         localStorage.setItem('user', JSON.stringify(userData));
@@ -78,13 +79,12 @@ const LoginForm = () => {
           // Navigate based on role
           const dashboardRoutes = {
             student: '/student-dashboard',
-            faculty: '/faculty-dashboard',
-            administrator: '/faculty-dashboard'
+            faculty: '/faculty-dashboard'
           };
           navigate(dashboardRoutes?.[formData?.role]);
         }
       } else {
-        setError('Invalid credentials. Please check your email, password, and role selection.');
+        setError(`Invalid credentials. No ${formData?.role} account found with this email and password.`);
       }
       setLoading(false);
     }, 1500);

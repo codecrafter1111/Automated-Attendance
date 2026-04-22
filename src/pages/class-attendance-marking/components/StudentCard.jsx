@@ -91,92 +91,6 @@ const StudentCard = ({
             <Image
               src={student?.photo}
               alt={student?.name}
-              className="w-14 h-14 rounded-lg object-cover shadow-md group-hover:shadow-lg transition-shadow duration-300"
-            />
-            {student?.verificationMethod && (
-              <div className={`absolute -bottom-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-md ${
-                student?.verificationMethod === 'biometric' ? 'bg-success' :
-                student?.verificationMethod === 'qr' ? 'bg-primary' :
-                student?.verificationMethod === 'face' ? 'bg-secondary' :
-                'bg-muted'
-              }`}>
-                <Icon 
-                  name={getVerificationIcon(student?.verificationMethod)} 
-                  size={14}
-                  color="white"
-                />
-              </div>
-            )}
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <h4 className="font-bold text-foreground truncate text-sm">{student?.name}</h4>
-            <p className="text-xs text-muted-foreground">Roll: {student?.rollNumber}</p>
-            {student?.timestamp && (
-              <p className="text-xs text-muted-foreground mt-1">
-                ✓ {new Date(student.timestamp)?.toLocaleTimeString()}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="grid grid-cols-3 gap-2 mb-2">
-          <Button
-            variant={student?.status === 'present' ? 'success' : 'outline'}
-            size="sm"
-            onClick={() => onStatusChange(student?.id, 'present')}
-            iconName="Check"
-            iconSize={14}
-            className={student?.status === 'present' ? 'shadow-button' : 'hover:border-success hover:text-success'}
-          >
-            Present
-          </Button>
-          
-          <Button
-            variant={student?.status === 'late' ? 'warning' : 'outline'}
-            size="sm"
-            onClick={() => onStatusChange(student?.id, 'late')}
-            iconName="Clock"
-            iconSize={14}
-            className={student?.status === 'late' ? 'shadow-button' : 'hover:border-warning hover:text-warning'}
-          >
-            Late
-          </Button>
-          
-          <Button
-            variant={student?.status === 'absent' ? 'danger' : 'outline'}
-            size="sm"
-            onClick={() => onStatusChange(student?.id, 'absent')}
-            iconName="X"
-            iconSize={14}
-            className={student?.status === 'absent' ? 'shadow-button' : 'hover:border-error hover:text-error'}
-          >
-            Absent
-          </Button>
-        </div>
-
-        {/* Biometric Verification Button */}
-        {onBiometricVerify && (
-          <Button
-            variant="outline"
-            size="sm"
-            fullWidth
-            onClick={() => onBiometricVerify(student?.id)}
-            iconName="Fingerprint"
-            iconSize={14}
-            className="hover:border-primary hover:text-primary hover:bg-primary/5"
-          >
-            Verify Biometric
-          </Button>
-        )}
-
-        {/* Student Info */}
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="relative">
-            <Image
-              src={student?.photo}
-              alt={student?.name}
               className="w-12 h-12 rounded-full object-cover"
             />
             {student?.verificationMethod && (
@@ -193,11 +107,18 @@ const StudentCard = ({
           <div className="flex-1 min-w-0">
             <h4 className="font-medium text-foreground truncate">{student?.name}</h4>
             <p className="text-sm text-muted-foreground">Roll: {student?.rollNumber}</p>
-            {student?.timestamp && (
-              <p className="text-xs text-muted-foreground">
-                Marked: {new Date(student.timestamp)?.toLocaleTimeString()}
-              </p>
-            )}
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+              {student?.timestamp && (
+                <span className="text-muted-foreground">
+                  Marked: {new Date(student.timestamp)?.toLocaleTimeString()}
+                </span>
+              )}
+              {student?.status === 'present' && (
+                <span className="px-2 py-0.5 rounded-full bg-success/10 text-success font-semibold">
+                  Attendance recorded{student?.verificationMethod ? ` via ${student.verificationMethod}` : ''}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -243,7 +164,7 @@ const StudentCard = ({
             onClick={() => onBiometricVerify(student?.id)}
             iconName="Fingerprint"
             iconSize={14}
-            className="mt-2"
+            className="mt-2 hover:border-primary hover:text-primary hover:bg-primary/5"
           >
             Verify Biometric
           </Button>

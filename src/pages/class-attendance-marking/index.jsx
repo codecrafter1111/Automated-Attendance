@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import HeaderNavigation from '../../components/ui/HeaderNavigation';
 import BreadcrumbNavigation from '../../components/ui/BreadcrumbNavigation';
 import ClassHeader from './components/ClassHeader';
@@ -9,10 +9,13 @@ import StudentCard from './components/StudentCard';
 import SessionControls from './components/SessionControls';
 import BiometricScannerModal from './components/BiometricScannerModal';
 import Icon from '../../components/AppIcon';
+import { getAttendanceSubmissions, getLatestActiveSession, mergeRemoteAttendanceSubmissions, upsertAttendanceSession } from '../../utils/attendanceSessionStore';
+import { fetchAttendanceFromMongo } from '../../utils/attendanceApi';
 
 
 const ClassAttendanceMarking = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState(null);
   
   // Session state
@@ -35,16 +38,50 @@ const ClassAttendanceMarking = () => {
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [allSelected, setAllSelected] = useState(false);
 
-  // Mock class data
-  const [classInfo] = useState({
-    id: "CS2021-DSA-A",
-    subject: "Data Structures and Algorithms",
-    time: "10:00 AM - 11:30 AM",
-    room: "Room 301, CS Block",
-    location: "Room 301, CS Block",
-    date: "13th September 2025",
-    status: "active",
-    faculty: "Dr. Rajesh Kumar"
+  const getStoredFacultyName = () => {
+    try {
+      const rawUser = localStorage.getItem('user');
+      if (!rawUser) return null;
+      const parsedUser = JSON.parse(rawUser);
+      return parsedUser?.role === 'faculty' ? parsedUser?.name : null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  // Class data from selected dashboard card (fallback to default when opened directly)
+  const [classInfo] = useState(() => {
+    const selectedClass = location?.state?.classData;
+    const loggedInFacultyName = getStoredFacultyName();
+    const today = new Date().toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    if (selectedClass) {
+      return {
+        id: selectedClass.subjectCode || String(selectedClass.id || 'CS2021-DSA-A'),
+        subject: selectedClass.name || selectedClass.subject || 'Data Structures and Algorithms',
+        time: selectedClass.time || '10:00 AM - 11:30 AM',
+        room: selectedClass.room || selectedClass.location || 'Room 301, CS Block',
+        location: selectedClass.room || selectedClass.location || 'Room 301, CS Block',
+        date: today,
+        status: selectedClass.status === 'ongoing' ? 'active' : (selectedClass.status || 'active'),
+        faculty: selectedClass.faculty || loggedInFacultyName || 'Dr. Rajesh Kumar',
+      };
+    }
+
+    return {
+      id: 'CS2021-DSA-A',
+      subject: 'Data Structures and Algorithms',
+      time: '10:00 AM - 11:30 AM',
+      room: 'Room 301, CS Block',
+      location: 'Room 301, CS Block',
+      date: today,
+      status: 'active',
+      faculty: loggedInFacultyName || 'Dr. Rajesh Kumar',
+    };
   });
 
   // Mock students data
@@ -131,6 +168,127 @@ const ClassAttendanceMarking = () => {
     }
   ]);
 
+  const getClassSubmissions = () => {
+    const safeSubmissions = getAttendanceSubmissions();
+    if (!Array.isArray(safeSubmissions)) return [];
+
+    const activeSession = getLatestActiveSession();
+    const activeSessionId = activeSession?.classId === classInfo.id ? activeSession.sessionId : null;
+
+    return safeSubmissions
+      .filter((item) => {
+        if (item.classId !== classInfo.id || item.status !== 'present') return false;
+        // Keep activity focused on the currently running lecture session when available.
+        if (activeSessionId) return item.sessionId === activeSessionId;
+        return true;
+      })
+      .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  };
+
+  const applyQRSubmissions = () => {
+    const submissions = getClassSubmissions();
+
+    if (submissions.length === 0) return;
+
+    setStudents((prev) => {
+      let changed = false;
+      const nextStudents = [...prev];
+
+      const updated = nextStudents.map((student) => {
+        const matchedSubmission = submissions.find((submission) => {
+          const byName = submission.studentName && student.name === submission.studentName;
+          const byId = submission.studentId && student.rollNumber === submission.studentId;
+          return byName || byId;
+        });
+
+        if (!matchedSubmission) return student;
+
+        if (
+          student.status === 'present' &&
+          student.verificationMethod === (matchedSubmission.method || 'qr') &&
+          student.timestamp === matchedSubmission.timestamp
+        ) {
+          return student;
+        }
+
+        changed = true;
+        return {
+          ...student,
+          status: 'present',
+          verificationMethod: matchedSubmission.method || 'qr',
+          timestamp: matchedSubmission.timestamp,
+          notes: 'Marked from student QR page',
+        };
+      });
+
+      const existingKeys = new Set(
+        updated.map((student) => `${student.name}::${student.rollNumber || ''}`)
+      );
+
+      submissions.forEach((submission) => {
+        const submissionName = submission.studentName || 'Unknown Student';
+        const submissionRoll = submission.studentId || '';
+        const key = `${submissionName}::${submissionRoll}`;
+
+        if (existingKeys.has(key)) return;
+
+        changed = true;
+        existingKeys.add(key);
+        updated.unshift({
+          id: Date.now() + Math.floor(Math.random() * 10000),
+          name: submissionName,
+          rollNumber: submissionRoll || `NEW-${Math.floor(Math.random() * 1000)}`,
+          photo: 'https://randomuser.me/api/portraits/lego/1.jpg',
+          status: 'present',
+          verificationMethod: submission.method || 'qr',
+          timestamp: submission.timestamp,
+          notes: 'Added from live attendance submission',
+        });
+      });
+
+      return changed ? updated : prev;
+    });
+  };
+
+  const formatMethodLabel = (method) => {
+    const normalized = String(method || '').trim().toLowerCase();
+
+    switch (normalized) {
+      case 'qr':
+      case 'qr_code':
+      case 'qrcode':
+        return 'QR Code';
+      case 'face':
+      case 'face_recognition':
+      case 'facerecognition':
+        return 'Face Recognition';
+      case 'biometric':
+      case 'fingerprint':
+        return 'Biometric';
+      case 'manual':
+        return 'Manual';
+      default:
+        if (!normalized) return 'Unknown Method';
+        return normalized
+          .split(/[_\s-]+/)
+          .filter(Boolean)
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(' ');
+    }
+  };
+
+  const recentActivity = getClassSubmissions().slice(0, 6).map((submission, index) => {
+    const safeTimestamp = Number(submission.timestamp) || Date.now();
+    const activityId = submission.id || `${submission.sessionId || 'session'}-${submission.studentId || submission.studentName || 'student'}-${safeTimestamp}-${index}`;
+
+    return {
+      id: activityId,
+      studentName: submission.studentName || submission.studentId || 'Student',
+      methodLabel: formatMethodLabel(submission.method),
+      timeLabel: new Date(safeTimestamp).toLocaleTimeString(),
+    };
+  });
+
   // Calculate attendance statistics
   const attendanceStats = {
     total: students?.length,
@@ -168,6 +326,44 @@ const ClassAttendanceMarking = () => {
     };
   }, []);
 
+  useEffect(() => {
+    applyQRSubmissions();
+
+    const intervalId = setInterval(() => {
+      applyQRSubmissions();
+    }, 3000);
+
+    const syncFromMongo = async () => {
+      const remoteSubmissions = await fetchAttendanceFromMongo({ classId: classInfo.id, limit: 100 });
+      if (remoteSubmissions?.length > 0) {
+        mergeRemoteAttendanceSubmissions(
+          remoteSubmissions.map((submission) => ({
+            ...submission,
+            timestamp: submission.timestamp ? new Date(submission.timestamp).getTime() : Date.now(),
+          }))
+        );
+        applyQRSubmissions();
+      }
+    };
+
+    syncFromMongo();
+    const mongoSyncInterval = setInterval(syncFromMongo, 5000);
+
+    const handleStorage = (event) => {
+      if (event.key === 'attendease_attendance_submissions') {
+        applyQRSubmissions();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(mongoSyncInterval);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, [classInfo.id]);
+
   // Filter and sort students
   const filteredStudents = students?.filter(student => {
       const matchesSearch = student?.name?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
@@ -187,6 +383,15 @@ const ClassAttendanceMarking = () => {
       }
     });
 
+  // Only keep students who recently marked attendance via QR
+  const recentQRStudents = filteredStudents
+    ?.filter((student) =>
+      student?.status === 'present' &&
+      student?.verificationMethod === 'qr' &&
+      !!student?.timestamp
+    )
+    ?.sort((a, b) => (b?.timestamp || 0) - (a?.timestamp || 0));
+
   // Handle student selection
   const handleStudentSelect = (studentId) => {
     setSelectedStudents(prev => 
@@ -201,7 +406,7 @@ const ClassAttendanceMarking = () => {
       setSelectedStudents([]);
       setAllSelected(false);
     } else {
-      setSelectedStudents(filteredStudents?.map(s => s?.id));
+      setSelectedStudents(recentQRStudents?.map(s => s?.id));
       setAllSelected(true);
     }
   };
@@ -241,6 +446,19 @@ const ClassAttendanceMarking = () => {
   // Handle attendance methods
   const handleGenerateQR = () => {
     setQrCodeVisible(true);
+  };
+
+  const handleStopQR = () => {
+    const activeSession = getLatestActiveSession();
+
+    if (activeSession && activeSession.classId === classInfo.id) {
+      upsertAttendanceSession({
+        ...activeSession,
+        endedAt: Date.now(),
+      });
+    }
+
+    setQrCodeVisible(false);
   };
 
   const handleToggleBiometric = () => {
@@ -345,13 +563,14 @@ const ClassAttendanceMarking = () => {
           {/* Attendance Methods Panel */}
           <AttendanceMethodsPanel
             qrCodeVisible={qrCodeVisible}
-            onCloseQR={() => setQrCodeVisible(false)}
+            onCloseQR={handleStopQR}
             biometricActive={biometricActive}
             faceRecognitionActive={faceRecognitionActive}
             onBulkMarkPresent={() => handleBulkStatusChange('present')}
             onBulkMarkAbsent={() => handleBulkStatusChange('absent')}
             selectedStudents={selectedStudents}
             classInfo={classInfo}
+            recentActivity={recentActivity}
           />
 
           {/* Student List Header */}
@@ -365,13 +584,13 @@ const ClassAttendanceMarking = () => {
             allSelected={allSelected}
             onSelectAll={handleSelectAll}
             selectedCount={selectedStudents?.length}
-            totalCount={filteredStudents?.length}
+            totalCount={recentQRStudents?.length}
             onBulkActions={handleBulkStatusChange}
           />
 
           {/* Students Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
-            {filteredStudents?.map(student => (
+            {recentQRStudents?.map(student => (
               <StudentCard
                 key={student?.id}
                 student={student}
@@ -385,12 +604,32 @@ const ClassAttendanceMarking = () => {
             ))}
           </div>
 
-          {filteredStudents?.length === 0 && (
+          {/* Recent Activity */}
+          <div className="bg-card rounded-lg border border-border p-5 mb-6">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h3>
+            <div className="space-y-2 text-sm">
+              {recentActivity.length > 0 ? (
+                recentActivity.map((activity) => (
+                  <div key={activity.id} className="text-muted-foreground">
+                    <span className="text-foreground font-medium">{activity.studentName}</span>{' '}
+                    marked attendance via {activity.methodLabel}{' '}
+                    <span className="text-xs">({activity.timeLabel})</span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-muted-foreground">No attendance activity yet for this class.</div>
+              )}
+            </div>
+          </div>
+
+          {recentQRStudents?.length === 0 && (
             <div className="bg-card rounded-lg shadow-card border border-border p-8 text-center">
               <Icon name="Users" size={48} className="text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No Students Found</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">No Recent QR Attendance</h3>
               <p className="text-muted-foreground">
-                {searchTerm || filterStatus !== 'all' ?'Try adjusting your search or filter criteria.' :'No students are enrolled in this class.'
+                {searchTerm || filterStatus !== 'all'
+                  ? 'No students match your search/filter with recent QR attendance.'
+                  : 'No students have recently marked attendance via QR for this class.'
                 }
               </p>
             </div>

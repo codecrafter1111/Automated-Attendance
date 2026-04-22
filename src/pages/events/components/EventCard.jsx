@@ -138,7 +138,7 @@ const EventCard = ({ event, userRole, isRegistered, onRegister, onUnregister, on
                 <Icon name="MoreVertical" size={16} />
               </button>
               {showOptions && (
-                <div className="absolute right-0 top-full mt-1 bg-card border border-border rounded-md shadow-lg z-10 w-32">
+                <div className="absolute right-0 -top-[260%] mt-1 bg-card border border-border rounded-md shadow-lg z-10 w-32">
                   <button
                     onClick={() => {
                       onEdit(event);

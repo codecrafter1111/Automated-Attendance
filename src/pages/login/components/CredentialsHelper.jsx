@@ -1,35 +1,29 @@
 import React, { useState } from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
+import studentData from '../../../Data/student';
+import facultyData from '../../../Data/faculty';
 
 const CredentialsHelper = () => {
   const [showCredentials, setShowCredentials] = useState(false);
 
-  const mockCredentials = [
-    {
+  const allCredentials = [
+    ...studentData.map((s, idx) => ({
       role: 'Student',
-      email: 'student@college.edu',
-      password: 'student123',
-      name: 'Rahul Sharma',
-      id: 'ST2024001',
+      email: s.email,
+      password: s.password,
+      name: s.username,
+      id: `ST${String(idx + 1).padStart(4, '0')}`,
       color: 'text-primary'
-    },
-    {
+    })),
+    ...facultyData.map((f, idx) => ({
       role: 'Faculty',
-      email: 'faculty@college.edu',
-      password: 'faculty123',
-      name: 'Dr. Priya Patel',
-      id: 'FC2024001',
+      email: f.email,
+      password: f.password,
+      name: f.username,
+      id: `FC${String(idx + 1).padStart(4, '0')}`,
       color: 'text-secondary'
-    },
-    {
-      role: 'Administrator',
-      email: 'admin@college.edu',
-      password: 'admin@123',
-      name: 'Admin Kumar',
-      id: 'AD2024001',
-      color: 'text-success'
-    }
+    }))
   ];
 
   return (
@@ -42,7 +36,7 @@ const CredentialsHelper = () => {
         iconPosition="right"
         className="w-full justify-center"
       >
-        Demo Credentials
+        Available Credentials
       </Button>
       {showCredentials && (
         <div className="mt-4 space-y-3">
@@ -52,12 +46,12 @@ const CredentialsHelper = () => {
               <p className="text-sm font-medium text-foreground">Demo Access</p>
             </div>
             <p className="text-xs text-muted-foreground">
-              Use these credentials to explore different user roles in the system
+              Use these credentials to login to the system based on your role
             </p>
           </div>
 
-          <div className="space-y-2">
-            {mockCredentials?.map((cred, index) => (
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {allCredentials?.map((cred, index) => (
               <div
                 key={index}
                 className="bg-background border border-border rounded-lg p-3"

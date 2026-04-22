@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
+import { upsertAttendanceSession } from '../../../utils/attendanceSessionStore';
 
 const AttendanceMethodsPanel = ({ 
   qrCodeVisible, 
@@ -11,7 +12,8 @@ const AttendanceMethodsPanel = ({
   onBulkMarkPresent,
   onBulkMarkAbsent,
   selectedStudents,
-  classInfo
+  classInfo,
+  recentActivity = []
 }) => {
   const [networkURL, setNetworkURL] = useState('');
   const [isLocalhost, setIsLocalhost] = useState(false);
@@ -47,7 +49,7 @@ const AttendanceMethodsPanel = ({
     const refreshInterval = setInterval(() => {
       setQrRefreshKey(prev => prev + 1);
       setTimeRemaining(10);
-    }, 30000);
+    }, 10000);
 
     return () => {
       clearInterval(countdownInterval);
@@ -55,19 +57,55 @@ const AttendanceMethodsPanel = ({
     };
   }, [qrCodeVisible]);
 
-  const qrCodeData = useMemo(() => {
-    const sessionId = 'sess_' + Math.random().toString(36).substr(2, 9);
+  const qrPayload = useMemo(() => {
+    const sessionId = 'sess_' + Math.random().toString(36).substring(2, 11);
+    const expiresInSeconds = 10;
+    const expiresAt = Date.now() + expiresInSeconds * 1000;
 
-    return JSON.stringify({
+    const payload = {
       classId: classInfo?.id || 'CLASS-12345',
       className: classInfo?.subject || 'Unknown Class',
       timestamp: Date.now(),
       location: classInfo?.location || 'Room A-101',
       sessionId,
       faculty: classInfo?.faculty || 'Faculty Name',
-      expiresIn: 10
+      expiresIn: expiresInSeconds,
+      expiresAt
+    };
+
+    const baseURL = networkURL || `${window.location.protocol}//${window.location.host}`;
+    const url = new URL('/mark-attendance', baseURL);
+    url.searchParams.set('classId', payload.classId);
+    url.searchParams.set('className', payload.className);
+    url.searchParams.set('sessionId', payload.sessionId);
+    url.searchParams.set('faculty', payload.faculty);
+    url.searchParams.set('location', payload.location);
+    url.searchParams.set('expiresAt', String(payload.expiresAt));
+
+    return {
+      ...payload,
+      url: url.toString(),
+    };
+  }, [classInfo, qrRefreshKey, networkURL]);
+
+  useEffect(() => {
+    if (!qrCodeVisible || !qrPayload?.sessionId) return;
+
+    upsertAttendanceSession({
+      sessionId: qrPayload.sessionId,
+      classId: qrPayload.classId,
+      className: qrPayload.className,
+      faculty: qrPayload.faculty,
+      location: qrPayload.location,
+      startedAt: Date.now(),
+      expiresAt: qrPayload.expiresAt,
+      qrURL: qrPayload.url,
     });
-  }, [classInfo, qrRefreshKey]);
+  }, [qrCodeVisible, qrPayload]);
+
+  const qrCodeData = useMemo(() => {
+    return qrPayload?.url || '';
+  }, [qrPayload]);
 
   if (!qrCodeVisible && !biometricActive && !faceRecognitionActive) {
     return null;
@@ -83,16 +121,24 @@ const AttendanceMethodsPanel = ({
           <span>Active Attendance Methods</span>
         </h3>
 
-        {selectedStudents?.length > 0 && (
-          <div className="flex space-x-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {qrCodeVisible && (
+            <Button size="sm" variant="destructive" onClick={onCloseQR}>
+              Stop QR
+            </Button>
+          )}
+
+          {selectedStudents?.length > 0 && (
+            <div className="flex space-x-2">
             <Button size="sm" onClick={onBulkMarkPresent}>
               Present ({selectedStudents.length})
             </Button>
             <Button size="sm" onClick={onBulkMarkAbsent}>
               Absent ({selectedStudents.length})
             </Button>
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* LOCALHOST WARNING */}
@@ -130,6 +176,9 @@ const AttendanceMethodsPanel = ({
               <p className="text-xs mt-1">
                 Refreshing in {timeRemaining}s
               </p>
+              <p className="text-[11px] mt-2 text-muted-foreground break-all max-w-[220px] mx-auto">
+                {qrPayload?.url}
+              </p>
             </div>
           </div>
         )}
@@ -158,9 +207,17 @@ const AttendanceMethodsPanel = ({
         <h4 className="font-bold mb-2">Recent Activity</h4>
 
         <div className="space-y-2 text-sm">
-          <div>Rahul Sharma marked present via QR</div>
-          <div>Priya Patel verified via face</div>
-          <div>Amit Kumar scanned fingerprint</div>
+          {recentActivity.length > 0 ? (
+            recentActivity.map((activity) => (
+              <div key={activity.id} className="text-muted-foreground">
+                <span className="text-foreground font-medium">{activity.studentName}</span>{' '}
+                marked present via {activity.methodLabel}{' '}
+                <span className="text-xs">({activity.timeLabel})</span>
+              </div>
+            ))
+          ) : (
+            <div className="text-muted-foreground">No attendance activity yet for this class.</div>
+          )}
         </div>
       </div>
 

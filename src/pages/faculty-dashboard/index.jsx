@@ -10,6 +10,8 @@ import QuickActions from './components/QuickActions';
 import LiveAttendanceSession from './components/LiveAttendanceSession';
 import AssignmentManagement from './components/AssignmentManagement';
 import Icon from '../../components/AppIcon';
+import { getAttendanceSubmissions, getLatestActiveSession, mergeRemoteAttendanceSubmissions } from '../../utils/attendanceSessionStore';
+import { fetchAttendanceFromMongo } from '../../utils/attendanceApi';
 
 
 const FacultyDashboard = () => {
@@ -137,6 +139,82 @@ const FacultyDashboard = () => {
       navigate('/login');
     }
   }, [navigate]);
+
+  useEffect(() => {
+    const syncLiveSession = () => {
+      const activeSession = getLatestActiveSession();
+      if (!activeSession) return;
+
+      const submissions = getAttendanceSubmissions();
+      if (!Array.isArray(submissions)) return;
+
+      const sessionSubmissions = submissions.filter(
+        (submission) => {
+          if (submission.status !== 'present') return false;
+          if (submission.classId !== activeSession.classId) return false;
+          if (activeSession.startedAt && submission.timestamp < activeSession.startedAt) return false;
+          if (activeSession.endedAt && submission.timestamp > activeSession.endedAt) return false;
+          return true;
+        }
+      );
+
+      const uniqueStudents = [];
+      const seen = new Set();
+
+      sessionSubmissions.forEach((submission) => {
+        const key = submission.studentId || submission.studentName;
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        uniqueStudents.push(submission);
+      });
+
+      setLiveSession({
+        id: activeSession.sessionId,
+        className: activeSession.className,
+        room: activeSession.location,
+        time: 'Live Session',
+        totalStudents: uniqueStudents.length > 0 ? Math.max(uniqueStudents.length, 1) : 1,
+        presentCount: uniqueStudents.length,
+        startTime: activeSession.startedAt || Date.now(),
+        recentAttendance: uniqueStudents.slice(0, 6).map((student) => ({
+          name: student.studentName || student.studentId || 'Student',
+          time: new Date(student.timestamp).toLocaleTimeString(),
+        })),
+      });
+    };
+
+    syncLiveSession();
+    const intervalId = setInterval(syncLiveSession, 3000);
+
+    const syncFromMongo = async () => {
+      const remoteSubmissions = await fetchAttendanceFromMongo({ limit: 100 });
+      if (remoteSubmissions?.length > 0) {
+        mergeRemoteAttendanceSubmissions(
+          remoteSubmissions.map((submission) => ({
+            ...submission,
+            timestamp: submission.timestamp ? new Date(submission.timestamp).getTime() : Date.now(),
+          }))
+        );
+        syncLiveSession();
+      }
+    };
+
+    syncFromMongo();
+    const mongoSyncInterval = setInterval(syncFromMongo, 5000);
+
+    const handleStorage = (event) => {
+      if (event.key === 'attendease_attendance_submissions' || event.key === 'attendease_active_attendance_sessions') {
+        syncLiveSession();
+      }
+    };
+
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      clearInterval(intervalId);
+      clearInterval(mongoSyncInterval);
+      window.removeEventListener('storage', handleStorage);
+    };
+  }, []);
 
   const handleStartAttendance = (classData) => {
     // Create live session
