@@ -52,7 +52,7 @@ const FacultyDashboard = () => {
     {
       id: 1,
       name: "Data Structures & Algorithms",
-      subjectCode: "CS2021-DSA-A",
+      subjectCode: "CS2021-DSA",
       time: "09:00 AM - 10:00 AM",
       room: "Room 301, CS Block",
       enrolledStudents: 45,
@@ -62,7 +62,7 @@ const FacultyDashboard = () => {
     {
       id: 2,
       name: "Database Management Systems",
-      subjectCode: "CS2021-DBMS-B",
+      subjectCode: "CS2021-DBMS",
       time: "10:00 AM - 11:00 AM",
       room: "Lab 205, IT Block",
       enrolledStudents: 38,
@@ -72,7 +72,7 @@ const FacultyDashboard = () => {
     {
       id: 3,
       name: "Software Engineering",
-      subjectCode: "CS2021-SE-C",
+      subjectCode: "CS2021-SE",
       time: "11:00 AM - 12:00 PM",
       room: "Room 102, Main Block",
       enrolledStudents: 42,
@@ -82,7 +82,7 @@ const FacultyDashboard = () => {
     {
       id: 4,
       name: "Computer Networks",
-      subjectCode: "CS2021-CN-D",
+      subjectCode: "CS2021-CN",
       time: "12:00 PM - 01:00 PM",
       room: "Lab 301, IT Block",
       enrolledStudents: 35,
@@ -92,7 +92,7 @@ const FacultyDashboard = () => {
     {
       id: 5,
       name: "Object Oriented Programming",
-      subjectCode: "CS2021-OOP-E",
+      subjectCode: "CS2021-OOP",
       time: "01:00 PM - 02:00 PM",
       room: "Room 210, CS Block",
       enrolledStudents: 40,
@@ -102,7 +102,7 @@ const FacultyDashboard = () => {
     {
       id: 6,
       name: "Artificial Intelligence",
-      subjectCode: "CS2021-AI-F",
+      subjectCode: "CS2021-AI",
       time: "02:00 PM - 03:00 PM",
       room: "Room 405, AI Block",
       enrolledStudents: 36,
@@ -112,7 +112,7 @@ const FacultyDashboard = () => {
     {
       id: 7,
       name: "Web Development",
-      subjectCode: "CS2021-WD-G",
+      subjectCode: "CS2021-WD",
       time: "03:00 PM - 04:00 PM",
       room: "Lab 112, Tech Block",
       enrolledStudents: 44,

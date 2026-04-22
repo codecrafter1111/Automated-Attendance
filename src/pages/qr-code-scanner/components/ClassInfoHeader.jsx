@@ -51,7 +51,7 @@ const ClassInfoHeader = ({ classInfo, attendanceWindow }) => {
                 {classInfo?.subject || 'Computer Science Fundamentals'}
               </h1>
               <p className="text-muted-foreground">
-                {classInfo?.code || 'CS101'} • Section {classInfo?.section || 'A'}
+                {classInfo?.code || 'CS101'}
               </p>
             </div>
           </div>
