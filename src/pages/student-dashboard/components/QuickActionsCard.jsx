@@ -30,10 +30,7 @@ const QuickActionsCard = ({ user }) => {
       icon: 'Edit',
       color: 'bg-warning',
       iconColor: 'white',
-      action: () => {
-        // Mock action for correction request
-        alert('Attendance correction request feature coming soon!');
-      }
+      action: () => navigate('/student-attendance-history', { state: { mode: 'correction-request' } })
     },
     {
       title: 'Download Report',
@@ -102,6 +99,7 @@ const QuickActionsCard = ({ user }) => {
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => navigate('/account-settings')}
             iconName="Settings"
             iconSize={16}
           >

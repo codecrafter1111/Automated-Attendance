@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
-const LiveAttendanceSession = ({ session, onEndSession, onMarkStudent }) => {
+const LiveAttendanceSession = ({ session, onEndSession, onMarkStudent, onShowQRCode }) => {
   const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
@@ -74,7 +74,7 @@ const LiveAttendanceSession = ({ session, onEndSession, onMarkStudent }) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.open(`/qr-code-display?session=${session?.id}`, '_blank')}
+              onClick={() => onShowQRCode?.(session)}
               iconName="QrCode"
               iconPosition="left"
               iconSize={16}

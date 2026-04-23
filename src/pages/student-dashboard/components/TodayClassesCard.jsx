@@ -40,6 +40,22 @@ const TodayClassesCard = ({ todayClasses }) => {
     navigate(`/qr-code-scanner?${params.toString()}`);
   };
 
+  const handleBiometricScan = (classItem) => {
+    const params = new URLSearchParams({
+      expectedClassId: String(classItem?.classId || classItem?.id || ''),
+      expectedSubject: String(classItem?.subject || ''),
+      expectedFaculty: String(classItem?.faculty || ''),
+      expectedLocation: String(classItem?.location || ''),
+      expectedStartTime: String(classItem?.startTime || ''),
+      expectedEndTime: String(classItem?.endTime || ''),
+      expectedCode: String(classItem?.code || ''),
+      expectedSection: String(classItem?.section || ''),
+      preferredMethod: 'biometric',
+    });
+
+    navigate(`/qr-code-scanner?${params.toString()}`);
+  };
+
   return (
     <div className="bg-card rounded-lg p-6 shadow-card border border-border">
       <div className="flex items-center justify-between mb-4">
@@ -120,6 +136,7 @@ const TodayClassesCard = ({ todayClasses }) => {
                           size="sm"
                           iconName="Fingerprint"
                           iconPosition="left"
+                          onClick={() => handleBiometricScan(classItem)}
                           disabled={!isInAttendanceWindow}
                         >
                           Biometric

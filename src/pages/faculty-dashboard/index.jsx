@@ -298,8 +298,14 @@ const FacultyDashboard = () => {
   };
 
   const handleSendAlert = (student) => {
-    // Mock alert sending
-    alert(`Alert sent to ${student?.name} (${student?.rollNumber})`);
+    const safeName = student?.name || 'Student';
+    const safeRoll = student?.rollNumber || 'unknown';
+    const recipientEmail = `${String(safeRoll).toLowerCase()}@college.edu`;
+    const subject = encodeURIComponent('Attendance Alert - Immediate Attention Required');
+    const body = encodeURIComponent(
+      `Hello ${safeName},\n\nYour attendance is currently below threshold. Please attend upcoming classes regularly.\n\nRegards,\nFaculty Team`
+    );
+    window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
   };
 
   const handleQuickAction = (actionId) => {
@@ -310,7 +316,7 @@ const FacultyDashboard = () => {
         break;
       case 'generate-report': navigate('/student-attendance-history', { state: { mode: 'report' } });
         break;
-      case 'schedule-class': alert('Schedule class functionality would open a modal or navigate to scheduling page');
+      case 'schedule-class': navigate('/events', { state: { mode: 'create-event' } });
         break;
       case 'assignments': setActiveTab('assignments');
         break;
@@ -326,8 +332,17 @@ const FacultyDashboard = () => {
 
   const handleMarkStudent = (method) => {
     if (method === 'manual') {
-      alert('Manual attendance marking would open a student selection modal');
+      navigate('/class-attendance-marking', { state: { mode: 'bulk' } });
     }
+  };
+
+  const handleShowQRCode = (session) => {
+    navigate('/class-attendance-marking', {
+      state: {
+        mode: 'show-qr',
+        sessionData: session,
+      },
+    });
   };
 
   if (!user) {
@@ -399,6 +414,7 @@ const FacultyDashboard = () => {
                   session={liveSession}
                   onEndSession={handleEndSession}
                   onMarkStudent={handleMarkStudent}
+                  onShowQRCode={handleShowQRCode}
                 />
               )}
 
