@@ -34,7 +34,6 @@ const TodayClassesCard = ({ todayClasses }) => {
       expectedStartTime: String(classItem?.startTime || ''),
       expectedEndTime: String(classItem?.endTime || ''),
       expectedCode: String(classItem?.code || ''),
-      expectedSection: String(classItem?.section || ''),
     });
 
     navigate(`/qr-code-scanner?${params.toString()}`);

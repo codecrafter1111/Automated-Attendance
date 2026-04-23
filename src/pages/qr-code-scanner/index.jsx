@@ -36,13 +36,11 @@ const QRCodeScanner = () => {
   const expectedStartTime = searchParams.get('expectedStartTime') || '';
   const expectedEndTime = searchParams.get('expectedEndTime') || '';
   const expectedCode = searchParams.get('expectedCode') || '';
-  const expectedSection = searchParams.get('expectedSection') || '';
 
   const currentClass = {
-    id: expectedClassId || 'CS101-2024-A',
+    id: expectedClassId || 'CS101-2024',
     subject: expectedSubject || 'Computer Science Fundamentals',
     code: expectedCode || 'CS101',
-    section: expectedSection || 'A',
     faculty: expectedFaculty || 'Dr. Priya Sharma',
     location: expectedLocation || 'Room A-101, Block A',
     startTime: expectedStartTime || '09:00',
@@ -100,11 +98,6 @@ const QRCodeScanner = () => {
     const sessionId = searchParams.get('sessionId');
     
     if (classId && sessionId) {
-      if (expectedClassId && classId !== expectedClassId) {
-        alert(`This QR belongs to class ${classId}. Please scan QR for selected class ${expectedClassId}.`);
-        return;
-      }
-
       console.log('✓ Auto-processing QR data:', { classId, sessionId });
       const qrData = {
         classId,
@@ -121,11 +114,6 @@ const QRCodeScanner = () => {
 
     if (!isWithinAttendanceWindow()) {
       alert(`Attendance is allowed only during ${attendanceWindow.start} - ${attendanceWindow.end} for this class.`);
-      return;
-    }
-
-    if (expectedClassId && qrData?.classId && qrData.classId !== expectedClassId) {
-      handleScanError(`Scanned QR is for ${qrData.classId}. Please scan QR for ${expectedClassId}.`);
       return;
     }
 

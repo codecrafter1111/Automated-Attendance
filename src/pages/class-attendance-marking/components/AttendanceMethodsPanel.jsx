@@ -94,8 +94,11 @@ const AttendanceMethodsPanel = ({
 
     const classWindow = getClassWindowFromRange(classInfo?.time);
 
+    // Remove section from classId for subject-wise attendance only
+    const subjectOnlyClassId = classInfo?.id ? String(classInfo.id).replace(/-[A-Z]$/, '') : 'CLASS-12345';
+
     const payload = {
-      classId: classInfo?.id || 'CLASS-12345',
+      classId: subjectOnlyClassId,
       className: classInfo?.subject || 'Unknown Class',
       timestamp: Date.now(),
       location: classInfo?.location || 'Room A-101',

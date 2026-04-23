@@ -28,9 +28,8 @@ const StudentDashboard = () => {
   const todayClasses = [
     {
       id: 1,
-      classId: "CS2021-DSA-A",
+      classId: "CS2021-DSA",
       code: "CS2021",
-      section: "A",
       subject: "Data Structures & Algorithms",
       faculty: "Dr. Priya Sharma",
       startTime: "09:00",
@@ -40,9 +39,8 @@ const StudentDashboard = () => {
     },
     {
       id: 2,
-      classId: "CS2021-DBMS-B",
+      classId: "CS2021-DBMS",
       code: "CS2021",
-      section: "B",
       subject: "Database Management Systems",
       faculty: "Prof. Rajesh Kumar",
       startTime: "10:00",
@@ -52,9 +50,8 @@ const StudentDashboard = () => {
     },
     {
       id: 3,
-      classId: "CS2021-SE-C",
+      classId: "CS2021-SE",
       code: "CS2021",
-      section: "C",
       subject: "Software Engineering",
       faculty: "Dr. Anita Verma",
       startTime: "11:00",
@@ -64,9 +61,8 @@ const StudentDashboard = () => {
     },
     {
       id: 4,
-      classId: "CS2021-CN-D",
+      classId: "CS2021-CN",
       code: "CS2021",
-      section: "D",
       subject: "Computer Networks",
       faculty: "Prof. Suresh Patel",
       startTime: "12:00",
@@ -76,9 +72,8 @@ const StudentDashboard = () => {
     },
     {
       id: 5,
-      classId: "CS2021-OOP-E",
+      classId: "CS2021-OOP",
       code: "CS2021",
-      section: "E",
       subject: "Object Oriented Programming",
       faculty: "Dr. Kavita Rao",
       startTime: "13:00",
@@ -88,9 +83,8 @@ const StudentDashboard = () => {
     },
     {
       id: 6,
-      classId: "CS2021-AI-F",
+      classId: "CS2021-AI",
       code: "CS2021",
-      section: "F",
       subject: "Artificial Intelligence",
       faculty: "Dr. Neeraj Singh",
       startTime: "14:00",
@@ -100,9 +94,8 @@ const StudentDashboard = () => {
     },
     {
       id: 7,
-      classId: "CS2021-WD-G",
+      classId: "CS2021-WD",
       code: "CS2021",
-      section: "G",
       subject: "Web Development",
       faculty: "Prof. Meera Nair",
       startTime: "15:00",

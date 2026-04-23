@@ -73,7 +73,7 @@ const ClassAttendanceMarking = () => {
 
     if (selectedClass) {
       return {
-        id: selectedClass.subjectCode || String(selectedClass.id || 'CS2021-DSA-A'),
+        id: selectedClass.subjectCode || String(selectedClass.id || 'CS2021-DSA'),
         subject: selectedClass.name || selectedClass.subject || 'Data Structures and Algorithms',
         time: selectedClass.time || '10:00 AM - 11:30 AM',
         room: selectedClass.room || selectedClass.location || 'Room 301, CS Block',
@@ -85,7 +85,7 @@ const ClassAttendanceMarking = () => {
     }
 
     return {
-      id: 'CS2021-DSA-A',
+      id: 'CS2021-DSA',
       subject: 'Data Structures and Algorithms',
       time: '10:00 AM - 11:30 AM',
       room: 'Room 301, CS Block',
